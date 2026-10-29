@@ -278,6 +278,8 @@ enum NamesEnum
 	TEXT_1VOCT,
 	TEXT_CV_SAVE,
 	TEXT_MORPH_TARGET,
+	TEXT_CV_SRC2,
+	TEXT_CV_SRC3,
 
 
 	NUM_NAMES
@@ -392,6 +394,8 @@ enum shortNamesEnum
 	SHORT_1VOCT,
 	SHORT_CV,
 	SHORT_MORPH_TARGET,
+	SHORT_SRC2,
+	SHORT_SRC3,
 
 	
 };
@@ -711,6 +715,9 @@ uint8_t menu_getActivePage();
 uint8_t menu_getActiveVoice();
 //-----------------------------------------------------------------
 void menu_setActiveVoice(uint8_t voiceNr);
+uint8_t menu_isLfoPage();
+uint8_t menu_getLfoNr(uint8_t voiceNr);
+void menu_showLfoPage(uint8_t lfoNr);
 //-----------------------------------------------------------------
 /** used to upodate all global parameters that need processing after a preset is loaded*/
 void menu_sendAllGlobals();

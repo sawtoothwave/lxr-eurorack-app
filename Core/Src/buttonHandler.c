@@ -375,6 +375,11 @@ static void buttonHandler_handleModeButtons(uint8_t mode) {
 			led_setMode2(buttonHandler_stateMemory.selectButtonMode);
 			//set menu to voice page mode
 			menu_switchPage(menu_getActiveVoice());
+			//coming from the LFO page (sub page 7, no select button) -> back to the 1st sub page
+			if(menu_getSubPage() == 7)
+			{
+				menu_switchSubPage(0,0);
+			}
 			led_setActiveSelectButton(menu_getSubPage()+1);
 			menu_resetActiveParameter();
 		}
@@ -734,6 +739,12 @@ static void buttonHandler_handleSelectButton(uint8_t buttonNr) {
 			//switch menu back to voice editing
 			//menu_switchPage(menu_getActiveVoice());
 		case SELECT_MODE_VOICE:
+
+			//an LFO page shown with DRUM + select button can belong to another drum -> back to the active drum
+			if((menu_getActivePage() <= VOICE7_PAGE) && (menu_getActivePage() != menu_getActiveVoice()))
+			{
+				menu_switchPage(menu_getActiveVoice());
+			}
 
 			//change sub page -> osc, filter, mod etc...
 			menu_switchSubPage(buttonNr-1, 1);
@@ -1587,6 +1598,26 @@ static void buttonHandler_partButtonReleased(uint8_t partNr)
 }
 #endif
 
+#if EURORACK_MODULE
+//--------------------------------------------------------
+/** show the LFO page of drum lfoNr (0-6) without changing the active drum.
+ * Used by MOD + select button and DRUM + select button on the LFO page or mod matrix */
+static void buttonHandler_showLfo(uint8_t lfoNr)
+{
+	if(!menu_isLfoPage())
+	{
+		//go to the LFO page of the active drum first, same as SHIFT + EDIT/MOD
+		buttonHandler_handleModeButtons((uint8_t) (0));
+		led_setMode2(SELECT_MODE_MOD);
+		menu_activePage = menu_getActiveVoice();
+		menu_switchSubPage(7,0);
+	}
+	//then show the selected LFO instead
+	menu_showLfoPage(lfoNr);
+	led_setActiveSelectButton((uint8_t) (lfoNr+1));
+}
+#endif
+//--------------------------------------------------------
 void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 {
 
@@ -1722,6 +1753,15 @@ void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 			}
 
 			else if (buttonHandler_getDrumButton()){ //when drum button is held, select active voice
+#if EURORACK_MODULE
+				if((menu_isLfoPage() || (buttonHandler_stateMemory.selectButtonMode == SELECT_MODE_MOD)) && (voiceNr>=1))
+				{
+					//LFO page or mod matrix: DRUM + select button shows that LFO, the active drum stays
+					buttonHandler_showLfo((uint8_t) (voiceNr-1));
+					led_setActiveVoiceLedsTemp(voiceNr);
+					return;
+				}
+#endif
 
 #if !EURORACK_MODULE
 				//check active bars of new track and make sure the view does not end up in inactive part
@@ -1883,8 +1923,8 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 
 			//While held, use button 1-8 to select voice
 
-			//display "selected voice: %d"
-			led_setActiveVoiceLedsTemp(menu_getActiveVoice()+1);
+			//display "selected voice: %d" (or "selected LFO" on an LFO page)
+			led_setActiveVoiceLedsTemp((uint8_t) ((menu_isLfoPage() ? menu_getActivePage() : menu_getActiveVoice())+1));
 			led_setValue(1, LED_1);
 			menu_repaintAll();
 		}
@@ -1900,17 +1940,8 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 	case BUT_8:
 		if(buttonHandler_getModButton() && !buttonHandler_getShiftButton())
 		{
-			//MOD + select button 2-8 -> jump to the LFO page of drum 1-7
-			const uint8_t voiceNr = (uint8_t) (buttonNr - BUT_2);
-			frontPanel_sendData(SEQ_CC, SEQ_SET_ACTIVE_TRACK, voiceNr);
-			menu_setActiveVoice(voiceNr);
-
-			//same as SHIFT + EDIT/MOD below
-			buttonHandler_handleModeButtons((uint8_t) (0));
-			led_setMode2(SELECT_MODE_MOD);
-			menu_activePage = menu_getActiveVoice();
-			menu_switchSubPage(7,0);
-			led_setActiveSelectButton(menu_getActiveVoice()+1);
+			//MOD + select button 2-8 -> show the LFO of drum 1-7, the active drum stays
+			buttonHandler_showLfo((uint8_t) (buttonNr - BUT_2));
 
 			//show "Selected LFO" until MOD is released
 			menu_lfoSelectActive = 1;

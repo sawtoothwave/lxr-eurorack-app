@@ -257,6 +257,8 @@ const Name valueNames[NUM_NAMES] =
 
 		{SHORT_CV, CAT_GLOBAL, LONG_CV},/*TEXT_CV_SAVE*/
 		{SHORT_MORPH_TARGET, CAT_SOUND, LONG_MORPH_TARGET},/*TEXT_MORPH_TARGET*/
+		{SHORT_SRC2, CAT_MOD, LONG_SRC}, /*TEXT_CV_SRC2*/
+		{SHORT_SRC3, CAT_MOD, LONG_SRC}, /*TEXT_CV_SRC3*/
 
 
 
@@ -1973,6 +1975,12 @@ void menu_repaint()
 	{
 		menu_repaintSimplePage();
 	}
+	else if(menu_lfoSelectActive || (buttonHandler_getDrumButton() && (menu_isLfoPage() || (buttonHandler_getMode() == SELECT_MODE_MOD))))
+	{
+		//MOD + select button, or DRUM held on an LFO page or the mod matrix: shown until the button is released
+		strcpy(&editDisplayBuffer[0][0], "Selected LFO");
+		sprintf(&editDisplayBuffer[1][0], "LFO %d", menu_getLfoNr(menu_activePage)+1);
+	}
 	else if(buttonHandler_getDrumButton())
 	{
 		strcpy(&editDisplayBuffer[0][0], "Selected Drum ");
@@ -2008,12 +2016,6 @@ void menu_repaint()
 
 		}
 
-	}
-	else if(menu_lfoSelectActive)
-	{
-		//MOD + select button: shown until MOD is released
-		strcpy(&editDisplayBuffer[0][0], "Selected LFO");
-		sprintf(&editDisplayBuffer[1][0], "LFO %d", menu_activeVoice+1);
 	}
 	else {
 		menu_repaintGeneric();
@@ -4596,6 +4598,29 @@ void menu_setActiveVoice(uint8_t voiceNr)
 	// **LFOTARGFIX - save the gap index
 	menu_TargetVoiceGapIndex = getModTargetGapIndex(activeParameters[PAR_TARGET_LFO1+voiceNr]);
 	menu_activeVoice = voiceNr;
+};
+//----------------------------------------------------------------
+/** 1 if the LFO page of a drum is shown (SHIFT+MOD or MOD + select button)*/
+uint8_t menu_isLfoPage()
+{
+	return (menu_activePage <= VOICE7_PAGE) && (menu_getSubPage() == 7) && (buttonHandler_getMode() == SELECT_MODE_VOICE);
+};
+//----------------------------------------------------------------
+/** LFO (0-5) used by drum voiceNr (0-6). There are only 6 LFOs, both hihats (drum 6 and 7) share LFO 6*/
+uint8_t menu_getLfoNr(uint8_t voiceNr)
+{
+	return voiceNr > 5 ? 5 : voiceNr;
+};
+//----------------------------------------------------------------
+/** show the LFO page of drum lfoNr (0-6) without changing the active drum. Only call when menu_isLfoPage()*/
+void menu_showLfoPage(uint8_t lfoNr)
+{
+	//already on sub page 7, only the drum whose LFO is shown changes. Keeps the selected parameter.
+	menu_activePage = lfoNr;
+	editModeActive = 0;
+	// **LFOTARGFIX - the gap index has to follow the shown LFO, not the active drum
+	menu_TargetVoiceGapIndex = getModTargetGapIndex(activeParameters[PAR_TARGET_LFO1+menu_getLfoNr(lfoNr)]);
+	menu_repaintAll();
 };
 //----------------------------------------------------------------
 #if !EURORACK_MODULE
