@@ -292,6 +292,12 @@ uint8_t buttonHandler_getManualButton()
 	return (Button_3_GPIO_Port->IDR & Button_3_Pin)!=0;
 }
 
+//MOD is button index 2 in DIO_processInputs, i.e. Button_3
+uint8_t buttonHandler_getModButton()
+{
+	return (Button_3_GPIO_Port->IDR & Button_3_Pin)!=0;
+}
+
 uint8_t buttonHandler_getSaveButton()
 {
 	return (Button_4_GPIO_Port->IDR & Button_4_Pin)!=0;
@@ -386,6 +392,8 @@ static void buttonHandler_handleModeButtons(uint8_t mode) {
 			menu_activePage = menu_getActiveVoice();
 			menu_switchSubPage(0,toggle);
 			led_setActiveSelectButton(menu_getActiveVoice()+1);
+			//menu_switchSubPage does not repaint, without this the new slot only shows on release
+			menu_repaintAll();
 		}
 		break;
 
@@ -1890,6 +1898,25 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 	case BUT_6:
 	case BUT_7:
 	case BUT_8:
+		if(buttonHandler_getModButton() && !buttonHandler_getShiftButton())
+		{
+			//MOD + select button 2-8 -> jump to the LFO page of drum 1-7
+			const uint8_t voiceNr = (uint8_t) (buttonNr - BUT_2);
+			frontPanel_sendData(SEQ_CC, SEQ_SET_ACTIVE_TRACK, voiceNr);
+			menu_setActiveVoice(voiceNr);
+
+			//same as SHIFT + EDIT/MOD below
+			buttonHandler_handleModeButtons((uint8_t) (0));
+			led_setMode2(SELECT_MODE_MOD);
+			menu_activePage = menu_getActiveVoice();
+			menu_switchSubPage(7,0);
+			led_setActiveSelectButton(menu_getActiveVoice()+1);
+
+			//show "Selected LFO" until MOD is released
+			menu_lfoSelectActive = 1;
+			menu_repaintAll();
+			break;
+		}
 		buttonHandler_voiceButtonPressed(buttonNr-BUT_1);
 #else
 	case BUT_VOICE_1:
@@ -2365,6 +2392,13 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 //--------------------------------------------------------
 void buttonHandler_buttonReleased(uint8_t buttonNr)
 {
+#if EURORACK_MODULE
+	//MOD released -> hide "Selected LFO", the repaint in the BUT_1 case below then shows the LFO page
+	if(buttonNr == BUT_MOD)
+	{
+		menu_lfoSelectActive = 0;
+	}
+#endif
 
 	switch (buttonNr)
 	{

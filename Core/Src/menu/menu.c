@@ -746,6 +746,7 @@ uint8_t menu_songMenuPosition = 0;
 /** buffer to minimize the display configuration.
 It holds a representation of the display content so only the changed cells have to be updated*/
 char currentDisplayBuffer[2][16];	/**< what is currently shown on the LCD*/
+uint8_t menu_lfoSelectActive = 0;	/**< 1 while the "Selected LFO" message is shown (MOD + select button)*/
 char editDisplayBuffer[2][17];		/**< what should be shown on the LCD after the next update. length 17 to allow zero termination without overflow.*/
 uint8_t visibleCursor=0;	/* cursor position and whether it's visible rightmost=visible, then row (0,1) then col: ccccrv */
 /* calc cursor to location (row, col both zero based) and make visible/invisible */
@@ -2007,6 +2008,12 @@ void menu_repaint()
 
 		}
 
+	}
+	else if(menu_lfoSelectActive)
+	{
+		//MOD + select button: shown until MOD is released
+		strcpy(&editDisplayBuffer[0][0], "Selected LFO");
+		sprintf(&editDisplayBuffer[1][0], "LFO %d", menu_activeVoice+1);
 	}
 	else {
 		menu_repaintGeneric();
