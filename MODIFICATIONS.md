@@ -37,6 +37,23 @@ With both shortcuts:
 
 Outside the mod matrix and LFO page, DRUM + select button switches drums as before.
 
+## Muting in perform mode
+
+Muting no longer needs a button combination. Select buttons 2–8 control drums 1–7.
+
+| In perform mode | What it does |
+|---|---|
+| Select button 2–8 | Mutes or unmutes the drum. |
+| Hold **SHIFT** + select button 2–8 | Plays the drum, as in EDIT mode. |
+| Hold **DRUM** + select button 2–8 | Nothing. In the official firmware this muted the drum. |
+
+- **The lights show what's playing.** When you enter perform mode, the select buttons of all unmuted
+  drums light up. A muted drum's light is off.
+- **An unmuted drum's light blinks off when the drum plays.** A muted drum doesn't play, so its light
+  stays off.
+- **In the official firmware, a select button on its own played the drum.** That moved to
+  SHIFT + select button.
+
 ## Fixes
 
 - **MOD updates the screen when pressed.** In the official firmware, pressing MOD switches the mod

@@ -326,6 +326,12 @@ static void buttonHandler_handleModeButtons(uint8_t mode) {
 #endif
 	}
 
+	//leaving perform mode -> turn its mute lights off
+	if(buttonHandler_stateMemory.selectButtonMode == SELECT_MODE_PERF && mode != SELECT_MODE_PERF)
+	{
+		led_clearLeds_1To8();
+	}
+
 	//toggle for mod matrix only
 	uint8_t toggle = (buttonHandler_stateMemory.selectButtonMode  == mode);
 
@@ -418,6 +424,8 @@ static void buttonHandler_handleModeButtons(uint8_t mode) {
 			{
 				led_setMode2(buttonHandler_stateMemory.selectButtonMode);
 				led_clearLeds_1To8();
+				//select buttons 2-8 are lit for unmuted drums
+				buttonHandler_showMuteLEDs();
 		//		led_initPatternSelectLeds();
 
 				//set menu to perf page
@@ -1620,16 +1628,8 @@ static void buttonHandler_showLfo(uint8_t lfoNr)
 //--------------------------------------------------------
 void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 {
-
-	if (menu_activePage == PERF_PAGE)
-	{
-		if((voiceNr>=1) && (buttonHandler_getDrumButton() == 0))
-		{
-			//turn button led off
-			led_setValue(0, LED_1+voiceNr);
-		}
-	}
-
+	//nothing to do: in perform mode the select button lights show the mutes
+	(void)voiceNr;
 }
 //--------------------------------------------------------
 // one of the 7 voice buttons pressed
@@ -1712,29 +1712,24 @@ void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 				//(buttonHandler_stateMemory.selectButtonMode == SELECT_MODE_PERF) {
 
 #if EURORACK_MODULE
-				//trigger voice, when DRUM held mute/unmute voice
+				//select button mutes/unmutes the voice, SHIFT + select button triggers it
+				//DRUM + select button does nothing
 				if(voiceNr>=1)
 				{
-					if(buttonHandler_getDrumButton())
+					if(buttonHandler_getShiftButton())
 					{
-						//mute/unmute
-						if (buttonHandler_mutedVoices & (1 << (voiceNr-1))) {
-							//unmute tracks 0-7
-							buttonHandler_muteVoice(voiceNr-1, 0);
-							//frontPanel_sendData(SEQ_CC, SEQ_UNMUTE_TRACK, voiceNr-1);
-						} else {
-							//mute tracks 0-7
-							buttonHandler_muteVoice(voiceNr-1, 1);
-							//frontPanel_sendData(SEQ_CC, SEQ_MUTE_TRACK, voiceNr-1);
-						}
-					}
-					else
-					{
+						//the button light blinks when the voice plays (MidiVoiceControl)
 						const uint8_t vel = Trigger_getAccent(voiceNr-1);
 						voiceControl_noteOn(voiceNr-1 , SEQ_DEFAULT_NOTE, vel);
-
-						//turn button led on
-						led_setValue(1, LED_1+voiceNr);
+					}
+					else if(!buttonHandler_getDrumButton())
+					{
+						//mute/unmute, this also updates the button light
+						if (buttonHandler_mutedVoices & (1 << (voiceNr-1))) {
+							buttonHandler_muteVoice(voiceNr-1, 0);
+						} else {
+							buttonHandler_muteVoice(voiceNr-1, 1);
+						}
 					}
 				}
 
@@ -2438,12 +2433,6 @@ void buttonHandler_buttonReleased(uint8_t buttonNr)
 
 	case BUT_1:
 		led_setValue(0, LED_1);
-		//if in performance mode -> show muted voices
-		if(buttonHandler_getMode() == SELECT_MODE_PERF)
-		{
-			led_clearLeds_1To8();
-
-		}
 		if(buttonHandler_getMode() != SELECT_MODE_MOD)
 		{
 			//While held, use button 1-8 to select voice
