@@ -123,35 +123,21 @@ IN_ITCM_RAM float softClipTwo(float in)
 
 //	return in;
 }
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-#define is_nan(x) ((x) != (x))
-
+//------------------------------------------------------------------------------------
+// Resets a filter state that has become NaN or infinite, which would otherwise stay
+// stuck and silence the filter until reboot. Tests the exponent bits directly:
+// -ffast-math assumes NaN never happens and removes a (x != x) check, even at -O0.
 float removeMaliciousSample(float in)
 {
-	if(is_nan(in))
+	union { float f; uint32_t u; } bits = { .f = in };
+
+	if((bits.u & 0x7F800000) == 0x7F800000)
 	{
 		return 0.f;
 	}
 
 	return in;
-
-	/*
-	uint32_t* floatInput = (uint32_t*)in;// *inArrayOfFloats;
-    uint32_t sample = *floatInput;// *inArrayOfFloats;
-    uint32_t exponent = sample & 0x7F800000;
-
-            // exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-            // exponent > 0 is 0 if denormalized, otherwise 1
-
-    int aNaN = exponent < 0x7F800000;
-    int aDen = exponent > 0;
-
-
-    *floatInput = sample * ( aNaN & aDen );
-    *floatInput */
 }
-#pragma GCC pop_options
 #define USE_FMAF 0
 //------------------------------------------------------------------------------------
 IN_ITCM_RAM void SVF_calcBlockZDF(ResonantFilter* filter, const uint8_t type, int16_t* buf, const uint8_t size)

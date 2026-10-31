@@ -64,3 +64,8 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
   instead of three identical "SRC" labels.
 - **Drum 7's LFO target is looked up correctly.** The official firmware reads past the end of the LFO
   target list when drum 7 is selected. Drum 7 now uses LFO 6's target, which is the LFO it plays.
+- **Filters can't get stuck silent.** In the official firmware, a filter that got into a bad state
+  (NaN) stayed silent until the module was switched off and on. You'd notice it most on the snare:
+  with the filter on, its noise disappeared, even with a low-pass wide open. The check that should
+  clear the bad state was removed by the compiler's speed settings. It works again now, for the
+  snare, cymbal and hi-hat filters.
