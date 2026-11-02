@@ -2263,29 +2263,46 @@ void menu_handleLoadSaveMenu(int8_t inc, uint8_t btnClicked)
 #if USE_INTERRUPT_ONLY_DURING_SAVE_PROJ
 	HAL_TIM_Base_Start_IT(&htim2);	//calc sample interrupt - prio 1
 #endif
+						{
 							preset_saveDrumsetRam(menu_selectedPresetNr[SAVE_TYPE_KIT],0);
+							FRESULT res = FR_OK;
 #if EURORACK_MODULE
-							preset_saveDrumsetSD(menu_selectedPresetNr[SAVE_TYPE_KIT],0);
+							res = preset_saveDrumsetSD(menu_selectedPresetNr[SAVE_TYPE_KIT],0);
 #endif
 #if USE_INTERRUPT_ONLY_DURING_SAVE_PROJ
 	HAL_TIM_Base_Stop_IT(&htim2);	//calc sample interrupt - prio 1
 #endif
 
 							menu_loadedPresetNr[CURRENT_KIT] = menu_selectedPresetNr[SAVE_TYPE_KIT];
+							if(res != FR_OK)
+							{
+								menu_showSdError(res);
+								menu_repaintAll();
+								break;
+							}
 							menu_activePage = KIT_SAVE_PAGE_OK;
 							sucessTimer = systick_ticks;
 							menu_repaint();
+						}
 
 							break;
 
 						case SAVE_TYPE_MORPH:
+						{
 							preset_saveDrumsetRam(menu_selectedPresetNr[SAVE_TYPE_MORPH],1);
-							preset_saveDrumsetSD(menu_selectedPresetNr[SAVE_TYPE_MORPH],1);
+							const FRESULT res = preset_saveDrumsetSD(menu_selectedPresetNr[SAVE_TYPE_MORPH],1);
+							if(res != FR_OK)
+							{
+								menu_showSdError(res);
+								menu_repaintAll();
+								break;
+							}
 
 							//menu_loadedPresetNr[CURRENT_KIT] = menu_selectedPresetNr[SAVE_TYPE_KIT];
 							menu_activePage = KIT_SAVE_PAGE_OK;
 							sucessTimer = systick_ticks;
 							menu_repaint();
+						}
 							break;
 
 						case SAVE_TYPE_GLO:

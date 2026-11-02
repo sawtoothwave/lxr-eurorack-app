@@ -20,6 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
+| 1.51-c3 | Fixes from OpenElixir-02. Not released yet. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
 
@@ -143,3 +144,21 @@ card at start-up, so saving to the new card before a restart could damage the fi
 - **The delay echoes at maximum Time and Range.** In the official firmware, Time and Range both at
   127 gave no echo at all, because the delay length wrapped around to zero. It now gives the longest
   delay, about 742 ms. Every other setting sounds the same as before.
+- **Switching the delay from normal to ping-pong no longer writes outside the delay's memory.** In
+  the official firmware, the first echo after the switch could be written into the memory holding the
+  audio output and FX settings. Found and fixed in OpenElixir-02 (custom LXR-02 firmware).
+- **Pitch EG slope at 127 no longer silences the drum** (drums 1–3 and the snare). At 127 the slope
+  became infinite and the drum went silent until the slope was turned down. 127 now gives the steepest
+  slope, the same maximum as the amp EG. Every other setting sounds the same. From OpenElixir-02.
+- **Loud snares clip instead of crackling.** With high volume and transient, the snare's output wrapped
+  around from full positive to full negative, which sounds like a loud crackle. It now clips, like the
+  other drums. From OpenElixir-02.
+- **The compressor clips instead of crackling with the FX bus on a mono output** (L1, R1, L2 or R2).
+  The stereo outputs already clipped. From OpenElixir-02.
+- **The RAT distortion no longer reads past the end of its table** at full-scale input. That read
+  used memory that is never set, which could put a bad value into the distortion. From OpenElixir-02.
+- **Saving a kit shows "SD Card error" when the card write fails.** The official firmware always showed
+  the save as successful and could leave the file open. The kit is still kept in the module's memory
+  until it's switched off, so you can try saving again. The same applies to saving the morph kit.
+- **A damaged "last used kit" file on the SD card no longer breaks start-up.** The module starts with
+  kit 1 instead of reading past the end of the kit list.

@@ -535,10 +535,12 @@ void preset_init(uint8_t presetNr)
 }
 
 //----------------------------------------------------
-static void preset_writeDrumsetData(uint8_t presetNr, uint8_t isMorph)
+//returns the first write error, so a failed save isn't reported as saved
+static FRESULT preset_writeDrumsetData(uint8_t presetNr, uint8_t isMorph)
 {
 	uint16_t i;
 	unsigned int bytesWritten;
+	FRESULT res = FR_OK;
 
 	if(isMorph)
 	{
@@ -586,15 +588,16 @@ static void preset_writeDrumsetData(uint8_t presetNr, uint8_t isMorph)
 
 			//value = interpolate(activeParameters[i],mainParameters[activeParameters[PAR_MORPH_TARGET]][i],activeParameters[PAR_MORPH]);
 #endif
-			f_write((FIL*)&SDFile,&value,1,&bytesWritten);
+			if(res == FR_OK) res = f_write((FIL*)&SDFile,&value,1,&bytesWritten);
 		}
 	} else {
 		for(i=0;i<END_OF_SOUND_PARAMETERS;i++)
 		{
 			soundengine_process();
-			f_write((FIL*)&SDFile,&mainParameters[presetNr][i],1,&bytesWritten);
+			if(res == FR_OK) res = f_write((FIL*)&SDFile,&mainParameters[presetNr][i],1,&bytesWritten);
 		}
 	}
+	return res;
 }
 
 //----------------------------------------------------
@@ -737,17 +740,16 @@ FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 	//write preset name to file
 
 	res = f_write((FIL*)&SDFile,(void*)savefileNames[presetNr][KIT_NAMES],8,&bytesWritten);
-	if(res != FR_OK) return res;
 #if !CALC_SAMPLES_IN_INTERRUPT
 	soundengine_process();
 #endif
 	//write the preset data
-	preset_writeDrumsetData(presetNr, isMorph);
-	
-	//close the file
-	f_close((FIL*)&SDFile);
+	if(res == FR_OK) res = preset_writeDrumsetData(presetNr, isMorph);
 
-	return FR_OK;
+	//close the file, also after an error so it isn't left open. Closing writes the last data to the card
+	const FRESULT closeRes = f_close((FIL*)&SDFile);
+
+	return res != FR_OK ? res : closeRes;
 #else
 #endif
 };
@@ -921,6 +923,9 @@ FRESULT preset_loadLastUsedPresetNrFromSD(uint8_t* presetNr)
 	//close the file handle
 	f_close((FIL*)&SDFile);
 
+	//a damaged file could hold any number: start with kit 1 rather than read past the kit list
+	if(*presetNr >= NUM_KIT_SLOTS)
+		*presetNr = 0;
 
 	return res;
 }

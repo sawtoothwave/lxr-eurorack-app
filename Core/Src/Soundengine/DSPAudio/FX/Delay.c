@@ -99,6 +99,11 @@ void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* o
 	int32_t* stereoOut = (int32_t*)outL;
 	int16_t* monoOut = outL;
 
+	//after a switch from normal mode the pointers can be in the upper half: pull them into the half ping-pong uses
+	d->oldRead &= FX_BUFFER_SIZE>>1;
+	d->newRead &= FX_BUFFER_SIZE>>1;
+	d->write &= FX_BUFFER_SIZE>>1;
+
 	for(uint8_t i=0;i<size;i++)
 	{
 
