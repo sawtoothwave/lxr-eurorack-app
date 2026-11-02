@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c2 | FX routing shortcut, ping-pong delay, restart shortcut, delay fix. |
+| 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
 
 ## Start-up screen
@@ -82,18 +82,29 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 - The change works like editing the drum's OUT parameter: the kit counts as changed, and saving the
   kit saves the new output.
 
-## Ping-pong delay
+## Delay
 
-The echoes now bounce between hard left and hard right (L, R, L, R…) for every drum on the FX bus,
-however the drum is panned. The dry sound stays where the drum is panned.
+In the normal delay mode, each drum's echoes now sit where the drum is panned. A drum panned 30R echoes
+at 30R; a centred drum echoes in the centre. Ping-pong mode works as in the official firmware.
 
-- **The first echo is always on the left.** In the official firmware, the delay kept the left and right
-  inputs separate. A centred drum echoed on both sides at once and didn't bounce, and a hard-left
-  drum started its echoes on the right.
-- **Echoes from a centred drum are about 3 dB louder in total.** Both sides of the drum go into the
-  delay together, as in the normal delay mode, instead of being split across the two sides.
-- **With the FX bus on a mono output (L1, R1, L2 or R2), you hear every echo.** The left and right
-  echoes are mixed together for a mono output.
+- **In the official firmware, normal-mode echoes were always in the centre.** The delay added left
+  and right together into one mono delay line. It now has a separate left and right line.
+- **Echoes start at the drum's own level, about 6 dB quieter than before for a centred drum.** Adding
+  left and right together made the official echoes louder than the dry sound. Turn up wet/dry or
+  feedback to make up for it.
+- **The longest delay is still about 742 ms.** The right line uses a second 64 kB buffer in the
+  module's main memory.
+- **With the FX bus on a mono output (L1, R1, L2 or R2), the echoes are the same as before.**
+
+## CPU meter (temporary)
+
+For testing the delay change. Will be removed or hidden before release.
+
+Hold **SHIFT + FX** to show how much of the time available for each audio block the module used:
+- **CPU peak:** the slowest block since you last let go of SHIFT + FX.
+- **now:** the slowest block in the last quarter of a second, updated while you hold the buttons.
+
+100% means the module only just finished a block in time. Above that, the audio crackles.
 
 ## Restart shortcut
 

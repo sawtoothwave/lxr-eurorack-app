@@ -18,15 +18,36 @@
 //#include "Soundengine/USB/usb_manager.h"
 #include "Soundengine/MIDI/Uart.h"
 
+//CPU meter (SHIFT + FX): CPU cycles of the slowest block since soundengine_getCpuPeak() was last called.
+//Measured with the DWT cycle counter, which DWT_Delay_Init() starts at boot
+static volatile uint32_t soundengine_peakCycles = 0;
+
+uint8_t soundengine_getCpuPeak()
+{
+	const uint32_t cycles = soundengine_peakCycles;
+	soundengine_peakCycles = 0;
+
+	//time available for one block, in CPU cycles
+	const float blockCycles = (float)SystemCoreClock * OUTPUT_DMA_SIZE / REAL_FS;
+	const float percent = cycles * 100.f / blockCycles;
+	return percent > 255.f ? 255 : (uint8_t)percent;
+}
+
 uint8_t soundengine_calcNextSampleBlock()
 {
 	if(bCurrentSampleValid!= SAMPLE_VALID)
 	{
+		const uint32_t start = DWT->CYCCNT;
 	#if USE_DAC2
 		mixer_calcNextSampleBlock((int16_t*)&dma_buffer[bCurrentSampleValid*(OUTPUT_DMA_SIZE*2)],(int16_t*)&dma_buffer2[bCurrentSampleValid*(OUTPUT_DMA_SIZE*2)]);
 	#else
 		mixer_calcNextSampleBlock(&dma_buffer[bCurrentSampleValid*(OUTPUT_DMA_SIZE*2)],&dma_buffer2[(1-bCurrentSampleValid)*(OUTPUT_DMA_SIZE*2)]);
 	#endif
+		const uint32_t cycles = DWT->CYCCNT - start;
+		if(cycles > soundengine_peakCycles)
+		{
+			soundengine_peakCycles = cycles;
+		}
 		bCurrentSampleValid = SAMPLE_VALID;
 
 		return 1;
