@@ -281,6 +281,8 @@ enum NamesEnum
 	TEXT_MORPH_TARGET,
 	TEXT_CV_SRC2,
 	TEXT_CV_SRC3,
+	TEXT_DJ_FILTER,
+	TEXT_DJ_RESO,
 
 
 	NUM_NAMES
@@ -397,6 +399,7 @@ enum shortNamesEnum
 	SHORT_MORPH_TARGET,
 	SHORT_SRC2,
 	SHORT_SRC3,
+	SHORT_DJ_FILTER,
 
 	
 };
@@ -433,7 +436,8 @@ enum catNamesEnum
 	CAT_MIDI,
 	CAT_CLOCK,
 	CAT_FX,
-	CAT_MOD
+	CAT_MOD,
+	CAT_DJ_FILTER
 };
 //-----------------------------------------------------------------
 // these must correspond with longNames in MenuText.h
@@ -530,7 +534,9 @@ enum longNamesEnum
 	LONG_SRC,
 	LONG_1VOCT,
 	LONG_CV,
-	LONG_MORPH_TARGET
+	LONG_MORPH_TARGET,
+	LONG_DJ_FILTER,
+	LONG_DJ_RESO
 	
 };
 

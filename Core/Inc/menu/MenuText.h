@@ -525,6 +525,7 @@ const char shortNames[][4]  =
 	{"mtg"},
 	{"sr2"},
 	{"sr3"},
+	{"dj"},
 
 };
 //-----------------------------------------------------------------
@@ -562,6 +563,7 @@ const char catNames[][16] =
 	{"Clock"},
 	{"Fx"},
 	{"Mod"},
+	{"DJ Filt."},
 };
 //-----------------------------------------------------------------
 // these must correspond to longNamesEnum
@@ -660,6 +662,8 @@ const char longNames[][16] =
 	{"1V/Oct"},
 	{"CV Save"},
 	{"MrphTrgt"},
+	{" Cutoff"},	//after the 8 characters of the category: "DJ Filt. Cutoff"
+	{" Reso"},
 };
 
 

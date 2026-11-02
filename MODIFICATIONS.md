@@ -107,6 +107,23 @@ Hold **SHIFT + FX** (either one first) to show how much of the time available fo
 
 100% means the module only just finished a block in time. Above that, the audio crackles.
 
+## DJ filter
+
+A filter on all four outputs, on the perform page. From OpenElixir-02 (custom LXR-02 firmware).
+
+| Perform page | What it does |
+|---|---|
+| Knob 4, "dj" | Centre (shown as "Off" while editing): no filter. Turn left for a low-pass that closes down to 40 Hz ("LP"), right for a high-pass that opens up to 8 kHz ("HP"). |
+| Knob 4 on the 2nd screen, "res" | Resonance. Turn the encoder right from "dj" to get there. |
+
+- **With the knob in the centre, the sound is exactly as without the filter.** A few steps either side
+  of the centre also count as off, because the knob has no centre click.
+- **It filters every drum and the FX on all four jacks together,** including drums routed to separate
+  jacks.
+- **The limiter comes after the filter,** so a high resonance can't make the outputs clip.
+- **It isn't saved.** It's off each time the module starts, and loading or saving a kit doesn't change
+  it.
+
 ## Output limiter
 
 Each output jack has a limiter, so drums and FX that add up to more than full scale no longer clip.

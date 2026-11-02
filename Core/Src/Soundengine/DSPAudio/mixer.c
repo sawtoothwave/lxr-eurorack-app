@@ -15,6 +15,7 @@
 #include <Soundengine/ModMatrix_Processor.h>
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/mixer.h"
+#include "Soundengine/DSPAudio/DjFilter.h"
 #include "Soundengine/config.h"
 #include "Soundengine/AudioCodecManager.h"
 #include "Soundengine/DSPAudio/CymbalVoice.h"
@@ -754,6 +755,9 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* dacOut,int16_t* dacOut2)
 	//FxBus_process doesn't move the FX bus to other jacks when cables are missing
 	if(fxBus.audioRouting == MIXER_ROUTING_DAC1_STEREO) mixer_stereoUsed[1] = 1;
 	else if(fxBus.audioRouting == MIXER_ROUTING_DAC2_STEREO) mixer_stereoUsed[0] = 1;
+
+	//DJ filter on all outputs (perform page), before the limiter: it catches the resonance peaks
+	djFilter_process(output, output2);
 
 	mixer_limitBlock(mixer_limiterGain[0], output, dacOut, mixer_stereoUsed[0]);
 	mixer_limitBlock(mixer_limiterGain[1], output2, dacOut2, mixer_stereoUsed[1]);

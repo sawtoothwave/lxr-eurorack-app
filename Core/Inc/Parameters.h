@@ -432,8 +432,8 @@ enum ParamEnums
 	PAR_TRACK_LENGTH,
 	
 	UNUSED_PAR_GLO_SAT,						//  - global saturation
-	PAR_POS_Y,						//  - UNUSED
-	PAR_FLUX,						//  - UNUSED
+	PAR_DJ_FILTER,					// global DJ filter, 63 = off (perform page, not saved). Was PAR_POS_Y, unused
+	PAR_DJ_RESO,					// its resonance. Was PAR_FLUX, unused
 	PAR_SOM_FREQ,					//  - UNUSED
 	PAR_TRACK_ROTATION,				// **PATROT
 
