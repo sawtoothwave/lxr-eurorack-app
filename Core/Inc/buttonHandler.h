@@ -214,8 +214,12 @@ int8_t buttonHandler_getArmedAutomationStep();
 uint8_t buttonHandler_getDrumButton();
 uint8_t buttonHandler_getManualButton();
 uint8_t buttonHandler_getModButton();
+uint8_t buttonHandler_getFxButton();
 uint8_t buttonHandler_getSaveButton ();
 uint8_t buttonHandler_getShiftButton ();
+//--------------------------------------------------------
+/** forget the outputs stored by FX + select button, called when a kit is loaded */
+void buttonHandler_clearFxReturnOutputs();
 //--------------------------------------------------------
 #endif
 //--------------------------------------------------------

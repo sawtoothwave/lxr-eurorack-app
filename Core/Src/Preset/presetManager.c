@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include "menu/CcNr2Text.h"
 #include "menu/menu.h"
+#include "buttonHandler.h"
 //#include <util/delay.h>
 #include "lcd.h"
 //#include <avr/pgmspace.h>
@@ -624,6 +625,8 @@ void preset_loadDrumsetRam(uint8_t presetNr, uint8_t isMorph, uint8_t sendImmedi
 
 		preset_saveLastUsedPresetNrToSD(presetNr);
 
+		//the new kit sets its own outputs, outputs stored by FX + select button don't apply to it
+		buttonHandler_clearFxReturnOutputs();
 	}
 	soundengine_process();
 

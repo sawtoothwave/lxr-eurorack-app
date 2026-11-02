@@ -26,6 +26,7 @@
 //#include "Soundengine/Sequencer/sequencer.h"
 #include "Preset/PresetManager.h"
 #include "Soundengine/FxBus.h"
+#include "Soundengine/DSPAudio/mixer.h"
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include <Soundengine/TriggerProcessor.h>
 
@@ -296,6 +297,12 @@ uint8_t buttonHandler_getManualButton()
 uint8_t buttonHandler_getModButton()
 {
 	return (Button_3_GPIO_Port->IDR & Button_3_Pin)!=0;
+}
+
+//FX is button index 3 in DIO_processInputs, i.e. Button_4
+uint8_t buttonHandler_getFxButton()
+{
+	return (Button_4_GPIO_Port->IDR & Button_4_Pin)!=0;
 }
 
 uint8_t buttonHandler_getSaveButton()
@@ -1624,6 +1631,59 @@ static void buttonHandler_showLfo(uint8_t lfoNr)
 	menu_showLfoPage(lfoNr);
 	led_setActiveSelectButton((uint8_t) (lfoNr+1));
 }
+//--------------------------------------------------------
+#define FX_RETURN_NONE 0xFF
+/** the output each drum used before FX + select button sent it to the FX bus.
+ * RAM only, not saved in kits. FX_RETURN_NONE -> use the FX bus output */
+static uint8_t buttonHandler_fxReturnOutput[6] = {FX_RETURN_NONE, FX_RETURN_NONE, FX_RETURN_NONE, FX_RETURN_NONE, FX_RETURN_NONE, FX_RETURN_NONE};
+
+void buttonHandler_clearFxReturnOutputs()
+{
+	for(uint8_t i=0; i<6; i++)
+	{
+		buttonHandler_fxReturnOutput[i] = FX_RETURN_NONE;
+	}
+}
+//--------------------------------------------------------
+/** light select buttons 2-8 for drums routed to the FX bus. Shown while FX is held.
+ * Not temp LEDs, so a drum's trigger flash can't wipe them. Cleared when FX is released */
+static void buttonHandler_showFxRoutingLEDs()
+{
+	for(uint8_t voiceNr=0; voiceNr<7; voiceNr++)
+	{
+		//the 2 hi-hats share output 6
+		const uint8_t out = voiceNr < 5 ? voiceNr : 5;
+		led_setValue(mixer_audioRouting[out] == MIXER_ROUTING_FX_BUS, (uint8_t) (LED_2+voiceNr));
+	}
+}
+//--------------------------------------------------------
+/** FX + select button: send drum voiceNr (0-6) to the FX bus, or back to its previous output */
+static void buttonHandler_toggleFxRouting(uint8_t voiceNr)
+{
+	//the 2 hi-hats share output 6
+	const uint8_t out = voiceNr < 5 ? voiceNr : 5;
+	uint8_t routing;
+
+	if(mixer_audioRouting[out] == MIXER_ROUTING_FX_BUS)
+	{
+		//back to the stored output, or to where the FX bus goes if nothing is stored
+		routing = buttonHandler_fxReturnOutput[out];
+		if(routing >= MIXER_ROUTING_FX_BUS)
+		{
+			routing = fxBus.audioRouting < MIXER_ROUTING_FX_BUS ? fxBus.audioRouting : MIXER_ROUTING_DAC1_STEREO;
+		}
+	}
+	else
+	{
+		buttonHandler_fxReturnOutput[out] = mixer_audioRouting[out];
+		routing = MIXER_ROUTING_FX_BUS;
+	}
+
+	//same as turning the encoder on the drum's OUT parameter
+	preset_touchTimer(PRESET_KIT_TIMER);
+	activeParameters[PAR_AUDIO_OUT1+out] = routing;
+	frontPanel_sendData(CC_2, (uint8_t) (PAR_AUDIO_OUT1+out-128), routing);
+}
 #endif
 //--------------------------------------------------------
 void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
@@ -1895,6 +1955,8 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 
 	case BUT_FX:
 		buttonHandler_handleModeButtons(SELECT_MODE_FX);
+		//while FX is held, select buttons 2-8 show which drums go to the FX bus
+		buttonHandler_showFxRoutingLEDs();
 		break;
 
 	case BUT_SHIFT:
@@ -1941,6 +2003,13 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 			//show "Selected LFO" until MOD is released
 			menu_lfoSelectActive = 1;
 			menu_repaintAll();
+			break;
+		}
+		if(buttonHandler_getFxButton() && !buttonHandler_getShiftButton())
+		{
+			//FX + select button 2-8 -> toggle drum 1-7 between the FX bus and its previous output
+			buttonHandler_toggleFxRouting((uint8_t) (buttonNr - BUT_2));
+			buttonHandler_showFxRoutingLEDs();
 			break;
 		}
 		buttonHandler_voiceButtonPressed(buttonNr-BUT_1);
@@ -2423,6 +2492,11 @@ void buttonHandler_buttonReleased(uint8_t buttonNr)
 	if(buttonNr == BUT_MOD)
 	{
 		menu_lfoSelectActive = 0;
+	}
+	//FX released -> turn off the FX routing lights, unless another mode has taken over the select buttons
+	if(buttonNr == BUT_FX && buttonHandler_getMode() == SELECT_MODE_FX)
+	{
+		led_clearLeds_1To8();
 	}
 #endif
 

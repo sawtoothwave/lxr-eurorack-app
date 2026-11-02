@@ -54,6 +54,23 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 - **In the official firmware, a select button on its own played the drum.** That moved to
   SHIFT + select button.
 
+## FX routing shortcut
+
+| Shortcut | What it does |
+|---|---|
+| Hold **FX** | Opens the FX page, as before. Select buttons 2–8 light up for the drums sent to the FX bus. |
+| Hold **FX** + select button 2–8 | Sends drum 1–7 to the FX bus, or takes it off the FX bus. |
+
+- **Taking a drum off the FX bus puts it back on its previous output.** The previous output is
+  remembered until you switch the module off or load a kit. It isn't saved in the kit, so kits stay
+  compatible with the official firmware.
+- **If there's no previous output, the drum goes to the FX bus's output.** This happens when the kit
+  loaded with the drum already on FX, or when you set it to FX in the menu.
+- **Select buttons 7 and 8 both switch the hi-hats.** The closed and open hi-hats share an output.
+- **Drum lights don't flash while FX is held.** Otherwise each hit would blink the routing lights.
+- The change works like editing the drum's OUT parameter: the kit counts as changed, and saving the
+  kit saves the new output.
+
 ## Fixes
 
 - **MOD updates the screen when pressed.** In the official firmware, pressing MOD switches the mod
