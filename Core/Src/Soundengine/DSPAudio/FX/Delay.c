@@ -145,15 +145,17 @@ void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* o
 			outR = calcOnePole(&d->tone2, outR);
 
 			//-------------
-			//left delay line
-			int16_t itg = (__QADD16(fxBuffer[idx1] , (int16_t)(outL*d->feedback)));
+			//both inputs go into the left line only, so the echoes bounce L, R, L... wherever the drum is panned.
+			//(fed per side, a centred drum echoed on both sides at once)
+			//right delay line (read as outR): only the left echo fed back
+			int16_t itg = (int16_t)(outL*d->feedback);
 			float val = itg/32767.f;
 			if(val > 1.f) val = 1.f;
 			else if(val < -1.f) val = -1.f;
 			FX_BUFFER[(FX_BUFFER_SIZE>>1) + d->write] = (__fp16)val;//(itg/32767.f);
 
-			//right delay line
-			itg = (__QADD16(fxBuffer[idx2] , (int16_t)(outR*d->feedback)));
+			//left delay line (read as outL): both inputs, as in the normal delay, plus the right echo fed back
+			itg = (__QADD16(__QADD16(fxBuffer[idx1], fxBuffer[idx2]) , (int16_t)(outR*d->feedback)));
 			val = itg/32767.f;
 			if(val > 1.f) val = 1.f;
 			else if(val < -1.f) val = -1.f;
@@ -177,6 +179,8 @@ void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* o
 			}
 			else
 			{
+				//mono output: both sides, otherwise only every other echo would be heard
+				wet = (int16_t)__QADD16(outL, outR);
 				int16_t tmp = __SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16);
 				*monoOut = __SSAT(*monoOut + tmp, 16);
 				monoOut+=2;
