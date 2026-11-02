@@ -13,10 +13,21 @@ official v1.51.
 - **LFO page**: the page with a drum's LFO settings, opened with SHIFT + MOD.
 - **Mod matrix**: the page opened by pressing MOD on its own.
 
+## Versions
+
+Custom versions are numbered as the official version they're based on plus a custom release number,
+for example **1.51-c2**. The start-up screen and the update file name show the full version.
+
+| Version | Changes |
+|---|---|
+| 1.51-c2 | FX routing shortcut. |
+| 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
+
 ## Start-up screen
 
 The first line of the start-up screen reads **"Custom firmware"** instead of "Sonic Potions", as the
-licence requires for modified firmware. The second line still shows the version.
+licence requires for modified firmware. The second line reads "LXR2 V" and the version, for example
+"LXR2 V1.51-c2", instead of "LXR2 Drums V1.51", to make room for the custom version number.
 
 ## LFO shortcuts
 
@@ -67,7 +78,8 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 - **If there's no previous output, the drum goes to the FX bus's output.** This happens when the kit
   loaded with the drum already on FX, or when you set it to FX in the menu.
 - **Select buttons 7 and 8 both switch the hi-hats.** The closed and open hi-hats share an output.
-- **Drum lights don't flash while FX is held.** Otherwise each hit would blink the routing lights.
+- **Each hit still flashes its drum's light while FX is held,** so you can tell which drum you're
+  hearing. A lit drum (on FX) blinks off, and an unlit drum blinks on.
 - The change works like editing the drum's OUT parameter: the kit counts as changed, and saving the
   kit saves the new output.
 

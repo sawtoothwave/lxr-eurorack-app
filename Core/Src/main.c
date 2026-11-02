@@ -241,7 +241,7 @@ lcd_clear();
 lcd_string("Custom firmware");
 //goto 2nd line
 lcd_setcursor(0,2);
-lcd_string("LXR2 Drums V");
+lcd_string("LXR2 V"); //"LXR2 Drums V" leaves no room for the custom version on a 16 character line
 lcd_string(FIRMWARE_VERSION);
 
 lcd_showSplash();

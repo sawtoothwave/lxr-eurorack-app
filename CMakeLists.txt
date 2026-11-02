@@ -25,6 +25,11 @@ project(LXR_V2_STM32F765_Eurorack
     LANGUAGES C ASM
 )
 
+# Custom firmware release number, on top of the official version above. Raise it by 1 for each
+# release. The full version (e.g. 1.51-c2) is shown on the start-up screen and names the update file.
+set(LXR_CUSTOM_VERSION 2)
+set(LXR_FIRMWARE_VERSION "${PROJECT_VERSION}-c${LXR_CUSTOM_VERSION}")
+
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type (Debug or Release)" FORCE)
 endif()
@@ -82,7 +87,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 # Linked at 0x08008000, behind the 32 KB bootloader.
 lxr_firmware_executable(${PROJECT_NAME} LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/STM32F765VGTX_FLASH.ld)
-lxr_add_firmware_outputs(${PROJECT_NAME} IMAGE_MAGIC LXRERIMG IMAGE_NAME LXRE_V2_V${PROJECT_VERSION})
+lxr_add_firmware_outputs(${PROJECT_NAME} IMAGE_MAGIC LXRERIMG IMAGE_NAME LXRE_V2_V${LXR_FIRMWARE_VERSION})
 
 # "flash": application only, the bootloader on the device is left alone.
 lxr_add_openocd_flash_target(flash
@@ -150,7 +155,7 @@ endif()
 if(bootloader)
     # LXRE_V2_V<version>_full.hex/.bin: bootloader at 0x08000000 + firmware at 0x08008000.
     lxr_add_combined_image(full_image
-        OUTPUT_NAME LXRE_V2_V${PROJECT_VERSION}_full
+        OUTPUT_NAME LXRE_V2_V${LXR_FIRMWARE_VERSION}_full
         BOOTLOADER ${bootloader}
         APPLICATION ${PROJECT_NAME}
         BOOTLOADER_MAGIC LXRERIMG
@@ -181,7 +186,7 @@ if(TARGET full_image)
     list(APPEND info_depends full_image)  # print after everything else is done
 endif()
 lxr_add_update_info(update_info
-    IMAGE ${CMAKE_CURRENT_BINARY_DIR}/LXRE_V2_V${PROJECT_VERSION}.img
+    IMAGE ${CMAKE_CURRENT_BINARY_DIR}/LXRE_V2_V${LXR_FIRMWARE_VERSION}.img
     IMAGE_PATTERN LXRE*.img
     DEVICE "module"
     DEPENDS ${info_depends}

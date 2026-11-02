@@ -28,8 +28,9 @@ cmake --preset release
 cmake --build --preset release
 ```
 
-The update file is written to `build/release/LXRE_V2_V<version>.img`. The version is set by
-`project(VERSION ...)` in [CMakeLists.txt](CMakeLists.txt) and shown on the start-up screen.
+The update file is written to `build/release/LXRE_V2_V<version>.img`. The version, e.g.
+`1.51-c2`, is the official version from `project(VERSION ...)` plus the custom release number
+`LXR_CUSTOM_VERSION`, both in [CMakeLists.txt](CMakeLists.txt). It is shown on the start-up screen.
 
 | Option | Effect |
 |---|---|
