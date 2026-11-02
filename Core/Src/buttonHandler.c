@@ -2007,6 +2007,11 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 
 	case BUT_SHIFT:
 		led_setValue(1, LED_SHIFT);
+		//FX + SHIFT: CPU meter, same as SHIFT + FX
+		if(buttonHandler_getFxButton())
+		{
+			menu_openCpuMeter();
+		}
 
 
 		break;
@@ -2544,7 +2549,7 @@ void buttonHandler_buttonReleased(uint8_t buttonNr)
 	{
 		led_clearLeds_1To8();
 	}
-	if(buttonNr == BUT_FX)
+	if(buttonNr == BUT_FX || buttonNr == BUT_SHIFT)
 	{
 		menu_closeCpuMeter();
 	}

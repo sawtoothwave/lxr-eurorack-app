@@ -100,8 +100,8 @@ at 30R; a centred drum echoes in the centre. Ping-pong mode works as in the offi
 
 For testing the delay change. Will be removed or hidden before release.
 
-Hold **SHIFT + FX** to show how much of the time available for each audio block the module used:
-- **CPU peak:** the slowest block since you last let go of SHIFT + FX.
+Hold **SHIFT + FX** (either one first) to show how much of the time available for each audio block the module used:
+- **CPU peak:** the slowest block since the meter was last closed. It closes when you let go of either button.
 - **now:** the slowest block in the last quarter of a second, updated while you hold the buttons.
 
 100% means the module only just finished a block in time. Above that, the audio crackles.
