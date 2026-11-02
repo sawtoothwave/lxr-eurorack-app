@@ -27,6 +27,7 @@
 #include "Preset/PresetManager.h"
 #include "Soundengine/FxBus.h"
 #include "Soundengine/DSPAudio/mixer.h"
+#include "encoder.h"
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include <Soundengine/TriggerProcessor.h>
 
@@ -1683,6 +1684,45 @@ static void buttonHandler_toggleFxRouting(uint8_t voiceNr)
 	preset_touchTimer(PRESET_KIT_TIMER);
 	activeParameters[PAR_AUDIO_OUT1+out] = routing;
 	frontPanel_sendData(CC_2, (uint8_t) (PAR_AUDIO_OUT1+out-128), routing);
+}
+//--------------------------------------------------------
+#define RESTART_HOLD_MS 3000
+static uint8_t buttonHandler_restartHeld = 0;			/**< 1 while DRUM + encoder are held together*/
+static uint32_t buttonHandler_restartHoldStart = 0;		/**< HAL_GetTick() when they were first held together*/
+
+/** holding DRUM + encoder for 3 s arms a restart, releasing DRUM then restarts the module.
+ * If the encoder is still held, the bootloader starts the SD card updater, as when it is held at power-on.
+ * Runs in the main loop like the SD card saves, so a restart can't interrupt a save */
+void buttonHandler_checkRestart()
+{
+	const uint8_t drum = buttonHandler_getDrumButton();
+
+	if(menu_restartArmed)
+	{
+		if(!drum)
+		{
+			NVIC_SystemReset();
+		}
+		return;
+	}
+
+	if(!drum || !encode_readButton())
+	{
+		buttonHandler_restartHeld = 0;
+		return;
+	}
+
+	if(!buttonHandler_restartHeld)
+	{
+		buttonHandler_restartHeld = 1;
+		buttonHandler_restartHoldStart = HAL_GetTick();
+	}
+	else if(HAL_GetTick() - buttonHandler_restartHoldStart >= RESTART_HOLD_MS)
+	{
+		//show "Release DRUM to restart"
+		menu_restartArmed = 1;
+		menu_repaintAll();
+	}
 }
 #endif
 //--------------------------------------------------------

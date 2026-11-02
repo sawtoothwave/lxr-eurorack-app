@@ -221,6 +221,9 @@ uint8_t buttonHandler_getShiftButton ();
 /** forget the outputs stored by FX + select button, called when a kit is loaded */
 void buttonHandler_clearFxReturnOutputs();
 //--------------------------------------------------------
+/** restart shortcut (DRUM + encoder held 3 s, then release DRUM). Call from the main loop */
+void buttonHandler_checkRestart();
+//--------------------------------------------------------
 #endif
 //--------------------------------------------------------
 void buttonHandler_muteVoice(uint8_t voice, uint8_t isMuted);

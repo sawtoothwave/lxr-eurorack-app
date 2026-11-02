@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c2 | FX routing shortcut, delay fix. |
+| 1.51-c2 | FX routing shortcut, ping-pong delay, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
 
 ## Start-up screen
@@ -81,6 +81,38 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 - **Drum lights don't flash on hits while FX is held,** so the lights show only the routing.
 - The change works like editing the drum's OUT parameter: the kit counts as changed, and saving the
   kit saves the new output.
+
+## Ping-pong delay
+
+The echoes now bounce between hard left and hard right (L, R, L, R…) for every drum on the FX bus,
+however the drum is panned. The dry sound stays where the drum is panned.
+
+- **The first echo is always on the left.** In the official firmware, the delay kept the left and right
+  inputs separate. A centred drum echoed on both sides at once and didn't bounce, and a hard-left
+  drum started its echoes on the right.
+- **Echoes from a centred drum are about 3 dB louder in total.** Both sides of the drum go into the
+  delay together, as in the normal delay mode, instead of being split across the two sides.
+- **With the FX bus on a mono output (L1, R1, L2 or R2), you hear every echo.** The left and right
+  echoes are mixed together for a mono output.
+
+## Restart shortcut
+
+Restarts the module without switching off the rack, for example to install an update.
+
+1. Hold **DRUM** and the **encoder button** together for 3 seconds. The screen shows "Release DRUM to
+   restart".
+2. Release DRUM:
+   - **Still holding the encoder:** the module restarts into the updater, as when the encoder is held
+     at power-on.
+   - **Encoder already released:** the module restarts normally.
+
+Letting go of either button before the 3 seconds are up does nothing. After the message appears,
+the restart can't be cancelled.
+
+**Swapping the SD card while the module is on:** wait a few seconds after your last edit before taking
+the card out, because kit edits are saved to the card 2 seconds after the last change. After putting
+the new card in, restart straight away, without editing anything first. The module only opens the
+card at start-up, so saving to the new card before a restart could damage the files on it.
 
 ## Fixes
 

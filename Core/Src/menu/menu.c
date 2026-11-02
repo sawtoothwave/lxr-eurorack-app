@@ -749,6 +749,7 @@ uint8_t menu_songMenuPosition = 0;
 It holds a representation of the display content so only the changed cells have to be updated*/
 char currentDisplayBuffer[2][16];	/**< what is currently shown on the LCD*/
 uint8_t menu_lfoSelectActive = 0;	/**< 1 while the "Selected LFO" message is shown (MOD + select button)*/
+uint8_t menu_restartArmed = 0;		/**< 1 after DRUM + encoder were held 3 s, releasing DRUM restarts the module*/
 char editDisplayBuffer[2][17];		/**< what should be shown on the LCD after the next update. length 17 to allow zero termination without overflow.*/
 uint8_t visibleCursor=0;	/* cursor position and whether it's visible rightmost=visible, then row (0,1) then col: ccccrv */
 /* calc cursor to location (row, col both zero based) and make visible/invisible */
@@ -1965,7 +1966,13 @@ void menu_repaint()
 	if(screensaver_Active) return;
 
 	visibleCursor = 0;
-	if(menu_activePage == LOAD_PAGE || menu_activePage==SAVE_PAGE)
+	if(menu_restartArmed)
+	{
+		//DRUM + encoder held 3 s: shown on every page until DRUM is released
+		strcpy(&editDisplayBuffer[0][0], "Release DRUM to");
+		strcpy(&editDisplayBuffer[1][0], "restart");
+	}
+	else if(menu_activePage == LOAD_PAGE || menu_activePage==SAVE_PAGE)
 	{
 		//this is a special case because the load/save page differs from all the other pages
 		menu_repaintLoadSavePage();

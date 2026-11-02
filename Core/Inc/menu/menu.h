@@ -45,6 +45,7 @@
 extern uint8_t menu_activePage;
 extern uint8_t menu_activeVoice;
 extern uint8_t menu_lfoSelectActive;
+extern uint8_t menu_restartArmed;
 extern uint8_t menu_playedPattern;
 extern uint8_t menu_activePatternBank;
 extern uint8_t menu_shownPattern;

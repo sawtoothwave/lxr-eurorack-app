@@ -493,6 +493,7 @@ voiceControl_start();
 
 	  //update the menu according to the encoder values
 	  dio_process();
+	  buttonHandler_checkRestart();
 	  soundengine_process();
 	//  menu_tick();
 	  adc_checkPots();

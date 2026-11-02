@@ -49,6 +49,10 @@ To start from scratch (e.g. after switching compilers), delete the `build/` fold
    holding until "LXR Updater" appears.
 3. Wait for "Update OK!". The module restarts with the new firmware.
 
+From 1.51-c2 on, you can do step 2 without switching off: hold DRUM and the encoder button for 3 seconds,
+then release DRUM while still holding the encoder. See [MODIFICATIONS.md](MODIFICATIONS.md#restart-shortcut)
+for what to watch out for when swapping the SD card with the module switched on.
+
 The updater (bootloader) is never changed by an update, so a failed or interrupted update can simply be
 repeated. The module's updater only looks for files named `LXRE*.img`, so desktop LXR update files on
 the same card are ignored.
