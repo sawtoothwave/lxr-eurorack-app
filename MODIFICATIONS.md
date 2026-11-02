@@ -115,7 +115,7 @@ A filter on all four outputs, on the perform page. From OpenElixir-02 (custom LX
 |---|---|
 | Knob 4, "dj" | Centre (shown as "Off" while editing): no filter. Turn left for a low-pass that closes down to 40 Hz ("LP"), right for a high-pass that opens up to 8 kHz ("HP"). |
 | Knob 4 on the 2nd screen, "res" | Resonance, 20 at start-up. Turn the encoder right from "dj" to get there. |
-| DRUM button (PERFORM mode) | Snaps the filter back to off. It opens over a few milliseconds instead of cutting, so there's no click. |
+| DRUM button (PERFORM mode) | Snaps the filter back to off and shows "Reset DJ filter" while held (instead of "Selected Drum"). It opens over a few milliseconds instead of cutting, so there's no click. |
 
 - **With the knob in the centre, the sound is exactly as without the filter.** A few steps either side
   of the centre also count as off, because the knob has no centre click.

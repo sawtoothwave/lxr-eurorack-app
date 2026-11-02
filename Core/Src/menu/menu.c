@@ -2023,6 +2023,11 @@ void menu_repaint()
 		strcpy(&editDisplayBuffer[0][0], "Selected LFO");
 		sprintf(&editDisplayBuffer[1][0], "LFO %d", menu_getLfoNr(menu_activePage)+1);
 	}
+	else if(buttonHandler_getDrumButton() && buttonHandler_getMode() == SELECT_MODE_PERF)
+	{
+		//DRUM in perform mode resets the DJ filter (buttonHandler), drums can't be selected here
+		strcpy(&editDisplayBuffer[0][0], "Reset DJ filter");
+	}
 	else if(buttonHandler_getDrumButton())
 	{
 		strcpy(&editDisplayBuffer[0][0], "Selected Drum ");
