@@ -1994,6 +1994,12 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 #if EURORACK_MODULE
 
 	case BUT_FX:
+		if(buttonHandler_getShiftButton())
+		{
+			//SHIFT + FX: CPU meter until FX is released, the page stays as it is
+			menu_openCpuMeter();
+			break;
+		}
 		buttonHandler_handleModeButtons(SELECT_MODE_FX);
 		//while FX is held, select buttons 2-8 show which drums go to the FX bus
 		buttonHandler_showFxRoutingLEDs();
@@ -2001,6 +2007,11 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 
 	case BUT_SHIFT:
 		led_setValue(1, LED_SHIFT);
+		//FX + SHIFT: CPU meter, same as SHIFT + FX
+		if(buttonHandler_getFxButton())
+		{
+			menu_openCpuMeter();
+		}
 
 
 		break;
@@ -2537,6 +2548,10 @@ void buttonHandler_buttonReleased(uint8_t buttonNr)
 	if(buttonNr == BUT_FX && buttonHandler_getMode() == SELECT_MODE_FX)
 	{
 		led_clearLeds_1To8();
+	}
+	if(buttonNr == BUT_FX || buttonNr == BUT_SHIFT)
+	{
+		menu_closeCpuMeter();
 	}
 #endif
 
