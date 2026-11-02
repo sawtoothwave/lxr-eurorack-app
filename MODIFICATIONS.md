@@ -78,8 +78,7 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 - **If there's no previous output, the drum goes to the FX bus's output.** This happens when the kit
   loaded with the drum already on FX, or when you set it to FX in the menu.
 - **Select buttons 7 and 8 both switch the hi-hats.** The closed and open hi-hats share an output.
-- **Each hit still flashes its drum's light while FX is held,** so you can tell which drum you're
-  hearing. A lit drum (on FX) blinks off, and an unlit drum blinks on.
+- **Drum lights don't flash on hits while FX is held,** so the lights show only the routing.
 - The change works like editing the drum's OUT parameter: the kit counts as changed, and saving the
   kit saves the new output.
 

@@ -71,7 +71,8 @@ void voiceControl_processQueue()
 						HiHat_trigger(voiceQueueVel[voice],voice-5,voiceQueueNote[voice]);
 
 					//only flash LEDs when not in voice select mode (DRUM)
-					if(!buttonHandler_getDrumButton())
+					//or showing the FX routing (FX held)
+					if(!buttonHandler_getDrumButton() && !buttonHandler_getFxButton())
 					{
 						led_pulseLed(LED_2+voice);
 					}
