@@ -753,11 +753,6 @@ It holds a representation of the display content so only the changed cells have 
 char currentDisplayBuffer[2][16];	/**< what is currently shown on the LCD*/
 uint8_t menu_lfoSelectActive = 0;	/**< 1 while the "Selected LFO" message is shown (MOD + select button)*/
 uint8_t menu_restartArmed = 0;		/**< 1 after DRUM + encoder were held 3 s, releasing DRUM restarts the module*/
-static uint8_t menu_cpuMeterActive = 0;	/**< 1 while SHIFT + FX shows the CPU meter*/
-static uint8_t menu_cpuPeak = 0;		/**< highest block load (%) between closing and reopening the meter*/
-static uint8_t menu_cpuNow = 0;			/**< highest block load (%) in the last 250 ms*/
-static uint8_t menu_cpuNowValid = 0;	/**< 0 until the first 250 ms after opening have been measured*/
-static uint32_t menu_cpuMeterTime = 0;	/**< HAL_GetTick() of the last "now" update*/
 char editDisplayBuffer[2][17];		/**< what should be shown on the LCD after the next update. length 17 to allow zero termination without overflow.*/
 uint8_t visibleCursor=0;	/* cursor position and whether it's visible rightmost=visible, then row (0,1) then col: ccccrv */
 /* calc cursor to location (row, col both zero based) and make visible/invisible */
@@ -1993,19 +1988,6 @@ void menu_repaint()
 		//DRUM + encoder held 3 s: shown on every page until DRUM is released
 		strcpy(&editDisplayBuffer[0][0], "Release DRUM to");
 		strcpy(&editDisplayBuffer[1][0], "restart");
-	}
-	else if(menu_cpuMeterActive)
-	{
-		//SHIFT + FX: % of the time available for each audio block
-		sprintf(&editDisplayBuffer[0][0], "CPU peak %3d%%", menu_cpuPeak);
-		if(menu_cpuNowValid)
-		{
-			sprintf(&editDisplayBuffer[1][0], "now      %3d%%", menu_cpuNow);
-		}
-		else
-		{
-			strcpy(&editDisplayBuffer[1][0], "now       --%");
-		}
 	}
 	else if(menu_activePage == LOAD_PAGE || menu_activePage==SAVE_PAGE)
 	{
@@ -4683,38 +4665,6 @@ void menu_showLfoPage(uint8_t lfoNr)
 	// **LFOTARGFIX - the gap index has to follow the shown LFO, not the active drum
 	menu_TargetVoiceGapIndex = getModTargetGapIndex(activeParameters[PAR_TARGET_LFO1+menu_getLfoNr(lfoNr)]);
 	menu_repaintAll();
-};
-//----------------------------------------------------------------
-/** SHIFT + FX pressed: show the highest load since the meter was last closed, then measure from now on */
-void menu_openCpuMeter()
-{
-	menu_cpuPeak = soundengine_getCpuPeak();
-	menu_cpuNowValid = 0;
-	menu_cpuMeterTime = HAL_GetTick();
-	menu_cpuMeterActive = 1;
-	menu_repaintAll();
-};
-//----------------------------------------------------------------
-void menu_closeCpuMeter()
-{
-	if(menu_cpuMeterActive)
-	{
-		//the next opening shows the peak from here on
-		soundengine_getCpuPeak();
-		menu_cpuMeterActive = 0;
-		menu_repaintAll();
-	}
-};
-//----------------------------------------------------------------
-void menu_cpuMeterTick()
-{
-	if(menu_cpuMeterActive && (HAL_GetTick() - menu_cpuMeterTime >= 250))
-	{
-		menu_cpuMeterTime = HAL_GetTick();
-		menu_cpuNow = soundengine_getCpuPeak();
-		menu_cpuNowValid = 1;
-		menu_repaint();
-	}
 };
 //----------------------------------------------------------------
 #if !EURORACK_MODULE

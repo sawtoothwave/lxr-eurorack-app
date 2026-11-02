@@ -726,12 +726,6 @@ uint8_t menu_isLfoPage();
 uint8_t menu_getLfoNr(uint8_t voiceNr);
 void menu_showLfoPage(uint8_t lfoNr);
 //-----------------------------------------------------------------
-/** CPU meter, shown while SHIFT + FX is held */
-void menu_openCpuMeter();
-void menu_closeCpuMeter();
-/** refreshes the meter's "now" value while it is shown. Call from the main loop */
-void menu_cpuMeterTick();
-//-----------------------------------------------------------------
 /** used to upodate all global parameters that need processing after a preset is loaded*/
 void menu_sendAllGlobals();
 //-----------------------------------------------------------------

@@ -494,7 +494,6 @@ voiceControl_start();
 	  //update the menu according to the encoder values
 	  dio_process();
 	  buttonHandler_checkRestart();
-	  menu_cpuMeterTick();
 	  soundengine_process();
 	//  menu_tick();
 	  adc_checkPots();

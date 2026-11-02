@@ -33,6 +33,4 @@
 void soundengine_init();
 void soundengine_process();
 uint8_t soundengine_calcNextSampleBlock();
-/** CPU meter: % of a block's time (64 samples) used by the slowest block since the last call */
-uint8_t soundengine_getCpuPeak();
 #endif /* INC_SOUNDENGINE_SOUNDENGINE_H_ */
