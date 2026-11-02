@@ -41,4 +41,11 @@ enum
 void mixer_init();
 void  mixer_calcNextSampleBlock(int16_t* output,int16_t* output2);
 
+/** add a packed stereo pair (__PKHBT: left in the low, right in the high half) to an interleaved 32-bit mix */
+static inline void mixer_addStereo(int32_t* out, int32_t x)
+{
+	out[0] += (int16_t)x;
+	out[1] += x >> 16;
+}
+
 #endif /* MIXER_H_ */

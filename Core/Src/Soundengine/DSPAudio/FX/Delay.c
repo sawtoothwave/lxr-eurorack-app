@@ -14,6 +14,7 @@
 
 
 #include "Soundengine/DSPAudio/FX/Delay.h"
+#include "Soundengine/DSPAudio/mixer.h"
 
 void Delay_init(Delay* d)
 {
@@ -92,12 +93,12 @@ void Delay_calcBuffer(Delay* d, uint8_t bufferIdx)
 }
 
 
-void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uint16_t size,  uint8_t channels, float dryWet)
+void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int32_t* outL, int32_t* outR, uint16_t size,  uint8_t channels, float dryWet)
 {
 
 	int32_t x;
-	int32_t* stereoOut = (int32_t*)outL;
-	int16_t* monoOut = outL;
+	int32_t* stereoOut = outL;
+	int32_t* monoOut = outL;
 
 	//after a switch from normal mode the pointers can be in the upper half: pull them into the half ping-pong uses
 	d->oldRead &= FX_BUFFER_SIZE>>1;
@@ -179,13 +180,13 @@ void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* o
 
 				x = __PKHBT(__SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16),   __SSAT(fxBuffer[idx2] + __SSAT((wet2 - fxBuffer[idx2]) * dryWet,16),16), 16);
 				//LERP dryWet
-				*stereoOut = __QADD16(*stereoOut, x);
-				stereoOut++;
+				mixer_addStereo(stereoOut, x);
+				stereoOut += 2;
 			}
 			else
 			{
 				int16_t tmp = __SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16);
-				*monoOut = __SSAT(*monoOut + tmp, 16);
+				*monoOut += tmp;
 				monoOut+=2;
 			}
 			//*input1 = dryWet*out + (1-dryWet)* (*input1);
@@ -196,13 +197,13 @@ void Delay_processPingPong(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* o
 	}
 }
 
-void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uint16_t size,  uint8_t channels, float dryWet)
+void Delay_process(Delay *d, int16_t *fxBuffer,int32_t* outL, int32_t* outR, uint16_t size,  uint8_t channels, float dryWet)
 {
 	//FX_BUFFER[0] = 0;
 
 	int32_t x;
-	int32_t* stereoOut = (int32_t*)outL;
-	int16_t* monoOut = outL;
+	int32_t* stereoOut = outL;
+	int32_t* monoOut = outL;
 	for(uint8_t i=0;i<size;i++)
 	{
 
@@ -326,15 +327,15 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 
 				x = __PKHBT(__SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16),   __SSAT(fxBuffer[idx2] + __SSAT((wet2 - fxBuffer[idx2]) * dryWet,16),16), 16);
 				//LERP dryWet
-				*stereoOut = __QADD16(*stereoOut, x);
-				stereoOut++;
+				mixer_addStereo(stereoOut, x);
+				stereoOut += 2;
 			}
 			else
 			{
 				//mono output: both lines, which adds up to the official mono echo
 				wet = (int16_t)__QADD16(out, outR);
 				int16_t tmp = __SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16);
-				*monoOut = __SSAT(*monoOut + tmp, 16);
+				*monoOut += tmp;
 				monoOut+=2;
 			}
 

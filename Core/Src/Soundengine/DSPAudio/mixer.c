@@ -11,6 +11,7 @@
  * NOTICE.md. See LICENSE and NOTICE.md in the root of the repository.
  */
 
+#include <string.h>
 #include <Soundengine/ModMatrix_Processor.h>
 #include <Soundengine/TriggerProcessor.h>
 #include "Soundengine/DSPAudio/mixer.h"
@@ -32,6 +33,10 @@
 	uint8_t l2_Available;
 	uint8_t r1_Available;
 
+INDTCMZ static float mixer_limiterGain[2][2];	//[DAC buffer][L,R]: limiter gain, 1 = unchanged
+
+//set while mixing a block: [0] output (DAC2 jacks), [1] output2 (DAC1 jacks) carries a stereo signal
+static uint8_t mixer_stereoUsed[2];
 
 //-----------------------------------------------------------------------
 INDTCMZ uint8_t mixer_audioRouting[6];
@@ -55,6 +60,7 @@ void mixer_init()
 	}
 	mixer_decimation_rate[6] 		= 1;
 #endif
+	mixer_limiterGain[0][0] = mixer_limiterGain[0][1] = mixer_limiterGain[1][0] = mixer_limiterGain[1][1] = 1.f;
 
 	FxBus_init();
 }
@@ -436,7 +442,7 @@ IN_ITCM_RAM static inline void mixer_addDataToOutputFilteredPan(uint8_t dest, co
 	}
 }
 //-----------------------------------------------------------------------
-IN_ITCM_RAM static inline void mixer_addDataToOutput(uint8_t dest, const float panL, const float panR,  int16_t* data,int16_t* outL,int16_t* outR,int16_t* outL2, int16_t* outR2, int16_t *fxBuffer)
+IN_ITCM_RAM static inline void mixer_addDataToOutput(uint8_t dest, const float panL, const float panR,  int16_t* data,int32_t* outL,int32_t* outR,int32_t* outL2, int32_t* outR2, int16_t *fxBuffer)
 {
 	//check if a cable is in the selected out
 	dest = mixer_checkOutJackAvailable(dest);
@@ -468,86 +474,111 @@ IN_ITCM_RAM static inline void mixer_addDataToOutput(uint8_t dest, const float p
 		break;
 
 	case MIXER_ROUTING_DAC1_STEREO:
+		mixer_stereoUsed[1] = 1;
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-#if 1
-			int32_t y;
-			int32_t x;
-			y = *((int32_t*)outL2);
-			//x = ((int16_t)(data[i] * panL)& 0xFFFF) | (((int16_t)(data[i] * panR)& 0xFFFF)<<16);
-			x = __PKHBT( (int16_t)(data[i] * panL), (int16_t)(data[i] * panR), 16);
-			*((int32_t*)outL2) = __QADD16(x, y);
+			outL2[0] += (int16_t)(data[i] * panL);
+			outL2[1] += (int16_t)(data[i] * panR);
 			outL2 += 2;
-#else
-
-
-			*outL2 = __QADD16(*outL2,(int16_t)(data[i] * panL)) & 0xFFFF;
-			outL2 += 2;
-
-			*outR2 = __QADD16(*outR2,(int16_t)(data[i] * panR)) & 0xFFFF;
-			outR2 += 2;
-#endif
 		}
 		break;
 	case MIXER_ROUTING_DAC2_STEREO:
+		mixer_stereoUsed[0] = 1;
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-#if 1
-			int32_t x,y;
-			y = *((int32_t*)outL);
-			//simdBuffer x;
-			//x = ((int16_t)(data[i] * panL)& 0xFFFF) | (((int16_t)(data[i] * panR)& 0xFFFF)<<16);
-			//*((int32_t*)outL) = __SADD16(x, y);
-			//x.word[0] = data[i] * panL;
-			//x.word[1] = data[i] * panR;
-			x = __PKHBT( (int16_t)(data[i] * panL), (int16_t)(data[i] * panR), 16);
-			//x = __PKHBT(data[i] * panL, data[i] * panR, 16);
-			*((int32_t*)outL) = __QADD16(x, y);
+			outL[0] += (int16_t)(data[i] * panL);
+			outL[1] += (int16_t)(data[i] * panR);
 			outL += 2;
-#else
-			*outL = __QADD16(*outL,(int16_t)(data[i] * panL)) & 0xFFFF;
-			outL += 2;
-
-			*outR = __QADD16(*outR,(int16_t)(data[i] * panR)) & 0xFFFF;
-			outR += 2;
-#endif
 		}
 		break;
 	case MIXER_ROUTING_DAC1_L:
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-			*outL2 = __QADD16(*outL2,data[i]);
+			*outL2 += data[i];
 			outL2 += 2;
 		}
 		break;
 	case MIXER_ROUTING_DAC1_R:
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-			*outR2 = __QADD16(*outR2,data[i]) ;
+			*outR2 += data[i];
 			outR2 += 2;
 		}
 		break;
 	case MIXER_ROUTING_DAC2_L:
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-			*outL = __QADD16(*outL,data[i]);
+			*outL += data[i];
 			outL += 2;
 		}
 		break;
 	case MIXER_ROUTING_DAC2_R:
 		for(i=0;i<OUTPUT_DMA_SIZE;i++)
 		{
-			*outR = __QADD16(*outR,data[i]);
+			*outR += data[i];
 			outR += 2;
 		}
 		break;
 
 	}
 }
+//-----------------------------------------------------------------------
+/* Output limiter, one per output jack. Up to full scale the mix passes unchanged, so anything that
+ * didn't clip before sounds exactly as before. When the drums and FX on a jack add up to more than
+ * full scale, its gain drops at once so that no sample clips, then recovers over about 100 ms.
+ * The two jacks of a DAC are limited together only while it carries a stereo signal (a drum or the
+ * FX bus on L+R), to keep the stereo image; otherwise a loud drum on one jack would duck the other. */
+#define MIXER_LIMITER_THRESHOLD	32768.f
+//gain recovery per sample, ~100 ms time constant (1-exp(-x) ~ x for this small x)
+#define MIXER_LIMITER_RELEASE	(1.f/(0.1f*REAL_FS))
+
+IN_ITCM_RAM static inline int16_t mixer_limitSample(float* gainState, const int32_t sample, const int32_t peak)
+{
+	float gain = *gainState;
+	//instant attack: scale this sample down to full scale
+	if(peak * gain > MIXER_LIMITER_THRESHOLD)
+	{
+		gain = MIXER_LIMITER_THRESHOLD / peak;
+	}
+	if(gain >= 1.f)
+	{
+		return __SSAT(sample, 16);
+	}
+	const int32_t out = (int32_t)(sample * gain);
+	gain += (1.f - gain) * MIXER_LIMITER_RELEASE;
+	//snap to exactly 1 (a step of < 0.01 dB), or the release would stall just below 1 in float
+	*gainState = gain > 0.999f ? 1.f : gain;
+	return __SSAT(out, 16);
+}
+
+IN_ITCM_RAM static void mixer_limitBlock(float* gain, const int32_t* in, int16_t* out, const uint8_t linked)
+{
+	//linked: both start from the lower gain and then follow the same peaks, so they stay equal
+	if(linked) gain[0] = gain[1] = gain[0] < gain[1] ? gain[0] : gain[1];
+
+	for(uint32_t i=0;i<OUTPUT_DMA_SIZE*2;i+=2)
+	{
+		const int32_t l = in[i];
+		const int32_t r = in[i+1];
+		int32_t peakL = l < 0 ? -l : l;
+		int32_t peakR = r < 0 ? -r : r;
+		if(linked)
+		{
+			peakL = peakR = peakL > peakR ? peakL : peakR;
+		}
+		out[i]   = mixer_limitSample(&gain[0], l, peakL);
+		out[i+1] = mixer_limitSample(&gain[1], r, peakR);
+	}
+}
 //#pragma GCC pop_options
 //-----------------------------------------------------------------------
-IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
+IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* dacOut,int16_t* dacOut2)
 {
+	//the voices and FX are summed in 32 bit, so nothing clips while mixing. The limiter at the end
+	//brings the sums into the DACs' 16 bit range (in the DMA buffers dacOut and dacOut2)
+	INDTCMZ static int32_t output[OUTPUT_DMA_SIZE*2];
+	INDTCMZ static int32_t output2[OUTPUT_DMA_SIZE*2];
+
 	voiceControl_processQueue();
 #if !EURORACK_MODULE
 	r2_Available = (switch_r2_GPIO_Port->IDR & switch_r2_Pin)>0;
@@ -602,8 +633,9 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 	const uint8_t pos = 0;
 
 	//Clear is necessary, otherwise we keep trash data on non routed outputs
-	bufferTool_clearBuffer(output,OUTPUT_DMA_SIZE*2);
-	bufferTool_clearBuffer(output2,OUTPUT_DMA_SIZE*2);
+	memset(output, 0, sizeof(output));
+	memset(output2, 0, sizeof(output2));
+	mixer_stereoUsed[0] = mixer_stereoUsed[1] = 0;
 
 	bufferTool_clearBuffer(fxBusData,OUTPUT_DMA_SIZE*2);
 
@@ -719,6 +751,12 @@ IN_ITCM_RAM void mixer_calcNextSampleBlock(int16_t* output,int16_t* output2)
 
 #endif
 	FxBus_process(fxBusData,  &output[pos],&output[pos+1],&output2[pos],&output2[pos+1], OUTPUT_DMA_SIZE);
+	//FxBus_process doesn't move the FX bus to other jacks when cables are missing
+	if(fxBus.audioRouting == MIXER_ROUTING_DAC1_STEREO) mixer_stereoUsed[1] = 1;
+	else if(fxBus.audioRouting == MIXER_ROUTING_DAC2_STEREO) mixer_stereoUsed[0] = 1;
+
+	mixer_limitBlock(mixer_limiterGain[0], output, dacOut, mixer_stereoUsed[0]);
+	mixer_limitBlock(mixer_limiterGain[1], output2, dacOut2, mixer_stereoUsed[1]);
 /*
 	if(activeParameters[UNUSED_PAR_GLO_SAT])
 	{

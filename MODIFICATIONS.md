@@ -107,6 +107,22 @@ Hold **SHIFT + FX** (either one first) to show how much of the time available fo
 
 100% means the module only just finished a block in time. Above that, the audio crackles.
 
+## Output limiter
+
+Each output jack has a limiter, so drums and FX that add up to more than full scale no longer clip.
+Based on the limiter in OpenElixir-02 (custom LXR-02 firmware).
+
+- **Anything that didn't clip before sounds exactly the same.** The limiter only acts when the sum on
+  a jack goes over full scale. It then turns that jack down just enough, and brings it back up over
+  about 100 ms.
+- **In the official firmware, the sum clipped hard.** That sounded like distortion or crackle on loud
+  hits, especially with several drums on one jack, or with jacks unplugged (the module then moves
+  drums onto the jacks that are plugged in).
+- **Each jack is limited on its own,** so a loud kick on L1 doesn't turn down a snare on R1. A jack pair
+  (L1/R1 or L2/R2) is limited together only while it carries a stereo signal: a drum or the FX bus set
+  to that stereo pair. That keeps stereo sounds from shifting to one side.
+- **There's no switch to turn it off.**
+
 ## Restart shortcut
 
 Restarts the module without switching off the rack, for example to install an update.
