@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c3 | Fixes from OpenElixir-02. Not released yet. |
+| 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
 
@@ -115,7 +115,7 @@ A filter on all four outputs, on the perform page. From OpenElixir-02 (custom LX
 |---|---|
 | Knob 4, "dj" | Centre (shown as "Off" while editing): no filter. Turn left for a low-pass that closes down to 40 Hz ("LP"), right for a high-pass that opens up to 8 kHz ("HP"). |
 | Knob 4 on the 2nd screen, "res" | Resonance, 20 at start-up. Turn the encoder right from "dj" to get there. |
-| DRUM button (PERFORM mode) | Snaps the filter back to off and shows "Reset DJ filter" while held (instead of "Selected Drum"). It opens over a few milliseconds instead of cutting, so there's no click. |
+| DRUM button (PERFORM mode) | Snaps the filter back to off and shows "DJ filter reset!" while held (instead of "Selected Drum"). It opens over a few milliseconds instead of cutting, so there's no click. |
 
 - **With the knob in the centre, the sound is exactly as without the filter.** A few steps either side
   of the centre also count as off, because the knob has no centre click.

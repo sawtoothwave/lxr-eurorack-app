@@ -2026,7 +2026,7 @@ void menu_repaint()
 	else if(buttonHandler_getDrumButton() && buttonHandler_getMode() == SELECT_MODE_PERF)
 	{
 		//DRUM in perform mode resets the DJ filter (buttonHandler), drums can't be selected here
-		strcpy(&editDisplayBuffer[0][0], "Reset DJ filter");
+		strcpy(&editDisplayBuffer[0][0], "DJ filter reset!");
 	}
 	else if(buttonHandler_getDrumButton())
 	{
