@@ -23,6 +23,8 @@
 
 //For delay an in16_t buffer would be more performant, but since the reverb uses flt16, we can save on an initial buffer clear to prevent NaN injection poisoning the buffer
 extern INDTCMZ __fp16 FX_BUFFER[FX_BUFFER_SIZE+1];
+//right line of the normal (stereo) delay. In main RAM, the DTCM has no room for a second 64 kB buffer
+extern __fp16 FX_BUFFER_R[FX_BUFFER_SIZE+1];
 
 //because we have 17 delay units using the memory in the reverb
 //must be masking compatible pow2-1

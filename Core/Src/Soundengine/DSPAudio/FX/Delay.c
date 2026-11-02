@@ -76,6 +76,7 @@ void Delay_calcBuffer(Delay* d, uint8_t bufferIdx)
 		uint32_t pos2 = d->oldRead+1;
 		pos2 = pos2 & (FX_BUFFER_SIZE);
 		d->tmpBuffer[0] = interpolate_s16((float)FX_BUFFER[d->oldRead], (float)FX_BUFFER[pos2],d->fracReadOld)*32767.f ;
+		d->tmpBuffer2[0] = interpolate_s16((float)FX_BUFFER_R[d->oldRead], (float)FX_BUFFER_R[pos2],d->fracReadOld)*32767.f ;
 		d->oldRead++;
 		d->oldRead = d->oldRead & (FX_BUFFER_SIZE);
 	} else
@@ -84,6 +85,7 @@ void Delay_calcBuffer(Delay* d, uint8_t bufferIdx)
 		uint32_t pos2 = d->newRead+1;
 		pos2 = pos2 & (FX_BUFFER_SIZE);
 		d->tmpBuffer[1] = interpolate_s16((float)FX_BUFFER[d->newRead], (float)FX_BUFFER[pos2],d->fracReadNew)*32767.f ;;
+		d->tmpBuffer2[1] = interpolate_s16((float)FX_BUFFER_R[d->newRead], (float)FX_BUFFER_R[pos2],d->fracReadNew)*32767.f ;
 		d->newRead++;
 		d->newRead = d->newRead & (FX_BUFFER_SIZE);
 	}
@@ -218,13 +220,15 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 		return out;
 
 	#else
-			int16_t out;
+			//stereo: the left line (FX_BUFFER) and right line (FX_BUFFER_R) keep each drum's echoes at its pan
+			int16_t out, outR;
 
 
 			if(d->interpValue <= 0.f) //no parameter change in progress -> no crossfade
 			{
 				Delay_calcBuffer(d, 0);
 				out = d->tmpBuffer[0];
+				outR = d->tmpBuffer2[0];
 				//if(d->interpValue <= 0.f) //no parameter change in progress -> no crossfade
 				{
 					//lfo modulation can cause pending delay times
@@ -241,6 +245,7 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 				Delay_calcBuffer(d, 1);
 
 				out = d->tmpBuffer[0] * d->interpValue + d->tmpBuffer[1] * (1.0 - d->interpValue);
+				outR = d->tmpBuffer2[0] * d->interpValue + d->tmpBuffer2[1] * (1.0 - d->interpValue);
 				//out = fourPole.process(out,sizeParameter,variationParameter*200);
 				d->interpValue -= d->interpStep; //decrement InterpFactor toward zero
 
@@ -254,6 +259,7 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 
 			//calc tone filter
 			out = calcOnePole(&d->tone, out);
+			outR = calcOnePole(&d->tone2, outR);
 
 			//-------------
 
@@ -289,13 +295,18 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 
 	#endif
 
-			//we add both stereo channels together for a mono delay
-			int16_t itg = (__QADD16(__QADD16(fxBuffer[idx1], fxBuffer[idx2]) , (int16_t)(out*d->feedback)));
-			//int16_t itg = (__QADD16(fxBuffer[idx1] , (int16_t)(out*d->feedback)));
+			//each channel feeds its own line (the official delay added both into one mono line)
+			int16_t itg = (__QADD16(fxBuffer[idx1] , (int16_t)(out*d->feedback)));
 			float val = itg/32767.f;
 			if(val > 1.f) val = 1.f;
 			else if(val < -1.f) val = -1.f;
-			FX_BUFFER[d->write++] = (__fp16)val;//(itg/32767.f);
+			FX_BUFFER[d->write] = (__fp16)val;//(itg/32767.f);
+
+			itg = (__QADD16(fxBuffer[idx2] , (int16_t)(outR*d->feedback)));
+			val = itg/32767.f;
+			if(val > 1.f) val = 1.f;
+			else if(val < -1.f) val = -1.f;
+			FX_BUFFER_R[d->write++] = (__fp16)val;
 			//*signalFeedback = out;
 
 			d->write &= FX_BUFFER_SIZE;
@@ -306,7 +317,7 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 
 			if(channels == 2)
 			{
-				int16_t wet2 =  out;
+				int16_t wet2 =  outR;
 
 				x = __PKHBT(__SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16),   __SSAT(fxBuffer[idx2] + __SSAT((wet2 - fxBuffer[idx2]) * dryWet,16),16), 16);
 				//LERP dryWet
@@ -315,6 +326,8 @@ void Delay_process(Delay *d, int16_t *fxBuffer,int16_t* outL, int16_t* outR, uin
 			}
 			else
 			{
+				//mono output: both lines, which adds up to the official mono echo
+				wet = (int16_t)__QADD16(out, outR);
 				int16_t tmp = __SSAT(fxBuffer[idx1] + __SSAT((wet - fxBuffer[idx1]) * dryWet,16),16);
 				*monoOut = __SSAT(*monoOut + tmp, 16);
 				monoOut+=2;
