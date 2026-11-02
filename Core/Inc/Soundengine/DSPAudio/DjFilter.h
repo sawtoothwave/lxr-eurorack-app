@@ -23,6 +23,7 @@
 #define DJ_FILTER_OFF 63	/**< knob value in the center (shown as 0): filter off */
 //knob values this close to the center are off too (the pots have no center detent)
 #define DJ_FILTER_DEAD_ZONE	3
+#define DJ_FILTER_RESO_DEFAULT	20	/**< resonance at start-up */
 
 /** filter knob 0..127 (63 = off) and resonance 0..127, from the menu */
 extern volatile uint8_t djFilter_value;

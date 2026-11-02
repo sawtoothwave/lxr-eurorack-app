@@ -829,7 +829,7 @@ void menu_init()
 
 	//DJ filter off (not saved)
 	activeParameters[PAR_DJ_FILTER] = DJ_FILTER_OFF;
-	activeParameters[PAR_DJ_RESO] = 0;
+	activeParameters[PAR_DJ_RESO] = DJ_FILTER_RESO_DEFAULT;
 
 	activeParameters[PAR_EUKLID_LENGTH] = 16;
 	activeParameters[PAR_EUKLID_STEPS] = 16;

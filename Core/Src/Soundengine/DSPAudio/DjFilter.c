@@ -28,7 +28,7 @@
 #define DJ_POS_OFF			0.002f
 
 volatile uint8_t djFilter_value = DJ_FILTER_OFF;
-volatile uint8_t djFilter_reso = 0;
+volatile uint8_t djFilter_reso = DJ_FILTER_RESO_DEFAULT;
 
 //state: 4 channels (both stereo outputs), zero delay feedback state variable filter
 INDTCMZ static float djFilter_ic1[4];

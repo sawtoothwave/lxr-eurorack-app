@@ -30,6 +30,7 @@
 #include "encoder.h"
 #include "Soundengine/MIDI/MidiVoiceControl.h"
 #include <Soundengine/TriggerProcessor.h>
+#include "Soundengine/DSPAudio/DjFilter.h"
 
 //used to remember the last active page when entering the sequencer mode
 //needed to return to the previously shown page when seq mode button is released
@@ -2024,6 +2025,10 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 		if(buttonHandler_stateMemory.selectButtonMode == SELECT_MODE_PERF)
 		{
 			buttonHandler_showMuteLEDs();
+			//DRUM in perform mode: DJ filter back to off (the filter glides open, no click)
+			activeParameters[PAR_DJ_FILTER] = DJ_FILTER_OFF;
+			menu_parseGlobalParam(PAR_DJ_FILTER, DJ_FILTER_OFF);
+			menu_repaintAll();
 		}
 		else
 		{
