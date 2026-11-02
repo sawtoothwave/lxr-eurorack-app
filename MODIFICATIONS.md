@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c2 | FX routing shortcut. |
+| 1.51-c2 | FX routing shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
 
 ## Start-up screen
@@ -97,3 +97,6 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
   with the filter on, its noise disappeared, even with a low-pass wide open. The check that should
   clear the bad state was removed by the compiler's speed settings. It works again now, for the
   snare, cymbal and hi-hat filters.
+- **The delay echoes at maximum Time and Range.** In the official firmware, Time and Range both at
+  127 gave no echo at all, because the delay length wrapped around to zero. It now gives the longest
+  delay, about 742 ms. Every other setting sounds the same as before.

@@ -363,6 +363,14 @@ void Delay_setDelayTime(Delay* d, float t)
 		//timeBuffer.write(offset);
 		//offset = timeBuffer.getAverage();
 
+		//time and range at max ask for the whole buffer, which wraps around to no delay at all.
+		//stay 2 samples short of it (1 for the wrap, 1 for the interpolation reading the next sample)
+		const float maxOffset = (float)((d->delayType == DELAY_NORMAL ? FX_BUFFER_SIZE : FX_BUFFER_SIZE>>1) - 2);
+		if(offset > maxOffset)
+		{
+			offset = maxOffset;
+		}
+
 		uint32_t offItg = (uint32_t)offset;
 		d->fracReadNew = offset-offItg;
 
