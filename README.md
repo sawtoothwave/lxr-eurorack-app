@@ -9,7 +9,7 @@ It is not made, approved or supported by Erica Synths.
 - **What's changed:** [MODIFICATIONS.md](MODIFICATIONS.md) lists every difference from the official firmware.
 
 The firmware runs on the module's STM32F765 (Cortex-M7, 216 MHz): drum voices, FX bus, trigger and CV
-inputs, MIDI, SD-card kit storage and the LCD/encoder UI.
+inputs, SD-card kit storage and the LCD/encoder UI.
 
 > **Licence and trademarks:** the firmware source code is free software under the GNU GPL version 3
 > ([LICENSE](LICENSE)). The names **"Erica Synths" and "LXR"** and the **LXR hardware** are the property
