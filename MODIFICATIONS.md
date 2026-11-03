@@ -57,7 +57,7 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 |---|---|
 | Select button 2–8 | Mutes or unmutes the drum. |
 | Hold **SHIFT** + select button 2–8 | Plays the drum, as in EDIT mode. |
-| Hold **DRUM** + select button 2–8 | Nothing. In the official firmware this muted the drum. |
+| Hold **DRUM** + select button 2–8 | Mutes or unmutes the drum, as without DRUM. DRUM resets the DJ filter, so you can do both at once. In the official firmware DRUM + select button muted the drum. |
 
 - **The lights show what's playing.** When you enter perform mode, the select buttons of all unmuted
   drums light up. A muted drum's light is off.

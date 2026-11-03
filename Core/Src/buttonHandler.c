@@ -1814,7 +1814,7 @@ void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 
 #if EURORACK_MODULE
 				//select button mutes/unmutes the voice, SHIFT + select button triggers it
-				//DRUM + select button does nothing
+				//also while DRUM is held (it resets the DJ filter), so both work at once
 				if(voiceNr>=1)
 				{
 					if(buttonHandler_getShiftButton())
@@ -1823,7 +1823,7 @@ void buttonHandler_voiceButtonReleased(uint8_t voiceNr)
 						const uint8_t vel = Trigger_getAccent(voiceNr-1);
 						voiceControl_noteOn(voiceNr-1 , SEQ_DEFAULT_NOTE, vel);
 					}
-					else if(!buttonHandler_getDrumButton())
+					else
 					{
 						//mute/unmute, this also updates the button light
 						if (buttonHandler_mutedVoices & (1 << (voiceNr-1))) {
