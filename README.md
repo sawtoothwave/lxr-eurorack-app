@@ -1,7 +1,15 @@
-# LXR V2 Eurorack firmware (STM32F765VG)
+# Custom firmware for the Erica Synths LXR Eurorack module
 
-Firmware for the LXR V2 Eurorack drum module: an STM32F765 (Cortex-M7, 216 MHz) running the drum
-voices, FX bus, trigger and CV inputs, MIDI, SD-card kit storage and the LCD/encoder UI.
+Unofficial custom firmware for the LXR V2 Eurorack drum module, based on the official v1.51. It adds
+shortcuts, perform-mode muting, a DJ filter, stereo delay echoes, an output limiter and bug fixes.
+It is not made, approved or supported by Erica Synths.
+
+- **Download:** get the `.img` file from the [latest release](https://github.com/sawtoothwave/lxr-eurorack-app/releases/latest)
+  and follow [Installing the update](#installing-the-update). No building needed.
+- **What's changed:** [MODIFICATIONS.md](MODIFICATIONS.md) lists every difference from the official firmware.
+
+The firmware runs on the module's STM32F765 (Cortex-M7, 216 MHz): drum voices, FX bus, trigger and CV
+inputs, MIDI, SD-card kit storage and the LCD/encoder UI.
 
 > **Licence and trademarks:** the firmware source code is free software under the GNU GPL version 3
 > ([LICENSE](LICENSE)). The names **"Erica Synths" and "LXR"** and the **LXR hardware** are the property
