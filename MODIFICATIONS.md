@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c4 | Load one drum from another kit, LFO retrigger fix, FX page matches its FX type. Not yet tested on the module. |
+| 1.51-c4 | Load one drum from another kit, LFO retrigger fix, FX page matches its FX type. |
 | 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
