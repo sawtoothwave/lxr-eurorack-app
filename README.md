@@ -4,50 +4,19 @@ Unofficial custom firmware for the LXR V2 Eurorack drum module, based on the off
 shortcuts, perform-mode muting, a DJ filter, stereo delay echoes, an output limiter and bug fixes.
 It is not made, approved or supported by Erica Synths.
 
-- **Download:** get the `.img` file from the [latest release](https://github.com/sawtoothwave/lxr-eurorack-app/releases/latest)
-  and follow [Installing the update](#installing-the-update). No building needed.
-- **What's changed:** [MODIFICATIONS.md](MODIFICATIONS.md) lists every difference from the official firmware.
+Some of the features and fixes come from [OpenElixir-02](https://github.com/tunefish777/openelixir-02),
+custom firmware for the LXR-02 desktop drum machine.
 
-The firmware runs on the module's STM32F765 (Cortex-M7, 216 MHz): drum voices, FX bus, trigger and CV
-inputs, SD-card kit storage and the LCD/encoder UI.
+- **Download:** [LXRE_V2_V1.51-c5.img](https://github.com/sawtoothwave/lxr-eurorack-app/releases/download/v1.51-c5/LXRE_V2_V1.51-c5.img)
+  (latest version), then follow [Installing the update](#installing-the-update). Older versions are on the
+  [releases page](https://github.com/sawtoothwave/lxr-eurorack-app/releases).
+- **What's changed:** [MODIFICATIONS.md](MODIFICATIONS.md) lists every difference from the official firmware.
 
 > **Licence and trademarks:** the firmware source code is free software under the GNU GPL version 3
 > ([LICENSE](LICENSE)). The names **"Erica Synths" and "LXR"** and the **LXR hardware** are the property
 > of Erica Synths and are **not** covered by this licence. Building and installing your own firmware is
 > at your own risk: Erica Synths provides no support for self-built or modified firmware.
 > See [NOTICE.md](NOTICE.md).
-
-## Building
-
-You need [CMake](https://cmake.org/download/) 3.21+, [Ninja](https://ninja-build.org/), the
-[Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
-(`arm-none-eabi-gcc`, tested with 14.3.rel1) and [Python 3](https://www.python.org/downloads/), all on `PATH`.
-
-- macOS: `brew install cmake ninja && brew install --cask gcc-arm-embedded`. Don't use
-  `brew install arm-none-eabi-gcc`: it lacks the C library and the build fails with it.
-- Windows: `winget install Kitware.CMake Ninja-build.Ninja Python.Python.3.12` plus Arm's installer
-  (tick "Add path to environment variable").
-- Linux: `sudo apt install cmake ninja-build python3` plus Arm's toolchain, with its `bin` folder on `PATH`.
-
-Then, in this folder:
-
-```sh
-cmake --preset release
-cmake --build --preset release
-```
-
-The update file is written to `build/release/LXRE_V2_V<version>.img`. The version, e.g.
-`1.51-c2`, is the official version from `project(VERSION ...)` plus the custom release number
-`LXR_CUSTOM_VERSION`, both in [CMakeLists.txt](CMakeLists.txt). It is shown on the start-up screen.
-
-| Option | Effect |
-|---|---|
-| `cmake --preset debug` | Debug build (`-O3 -g3`, `DEBUG` defined) in `build/debug/` |
-| `-DARM_TOOLCHAIN_DIR=<bin folder>` | Use a toolchain that isn't on `PATH` |
-| `-DLXR_ITCM_OPT=-O2` | Lower optimisation for code in the 16 KB ITCM, if a change or compiler makes it overflow at `-O3` |
-| `-DLXR_GENERATE_LISTING=ON` | Also write a disassembly listing (`.list`) |
-
-To start from scratch (e.g. after switching compilers), delete the `build/` folder.
 
 ## Installing the update
 
@@ -65,40 +34,11 @@ The updater (bootloader) is never changed by an update, so a failed or interrupt
 repeated. The module's updater only looks for files named `LXRE*.img`, so desktop LXR update files on
 the same card are ignored.
 
-## Programming with a debug probe
+## About me
 
-Not needed for updates. With an ST-Link and [OpenOCD](https://openocd.org/) on `PATH`:
+I'm an [electronic musician](https://www.mute-city.com) who makes glitchy melodic IDM/ambient/drum-and-bass using a combination of software (REAPER, Ableton Live) and hardware (Octatrack, eurorack, etc.).
 
-```sh
-cmake --build --preset release --target flash        # firmware only, bootloader untouched
-```
-
-For blank devices, configure with the Eurorack bootloader, either from source
-(`-DLXR_BOOTLOADER_DIR=path/to/LXR_V2_STM32F765_Bootloader`, built with `LXR_BOOTLOADER_EURORACK`) or
-prebuilt (`-DLXR_BOOTLOADER_HEX=path/to/LXR_V2_Eurorack_Bootloader.hex`). The build then also writes
-`LXRE_V2_V<version>_full.hex/.bin` (whole flash from 0x08000000) and enables the `flash_full` target.
-
-> **Warning:** `flash_full` overwrites the bootloader and asks you to type `yes` first (or set
-> `LXR_CONFIRM_BOOTLOADER_OVERWRITE=yes`). If it is interrupted, the module can only be recovered with a
-> debug probe.
-
-## Memory map
-
-| Region | Address | Size | Contents |
-|---|---|---|---|
-| FLASH | 0x08000000 | 32 KB | Bootloader |
-| FLASH | 0x08008000 | 992 KB | This firmware |
-| ITCM | 0x00000000 | 16 KB | `IN_ITCM_RAM` DSP code |
-| DTCM | 0x20000000 | 128 KB | `INDTCM`/`INDTCMZ` data, DMA buffers, stack |
-| RAM | 0x20020000 | 384 KB | `.data`, `.bss`, heap |
-
-## Source layout
-
-Originally an STM32CubeIDE project; the CubeMX `.ioc` was removed because regenerating code from it
-overwrites application code. Pins, clocks and peripherals live in `Core/Inc/main.h`, `Core/Src/main.c`
-and `Core/Src/stm32f7xx_hal_msp.c`. Source files are listed explicitly in the `CMakeLists.txt` files
-(`Core/` is split into `lxr_platform`, `lxr_io`, `lxr_ui`, `lxr_preset`, `lxr_dsp`, `lxr_engine` and
-`lxr_midi`); add new files there.
+You can find me on [Bandcamp](https://mute-city.bandcamp.com/), [Subvert](https://subvert.fm/mute-city), [YouTube](https://www.youtube.com/@Mute-City), and [Instagram](https://instagram.com/mute.city).
 
 ## Licence
 
