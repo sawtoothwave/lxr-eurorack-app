@@ -3767,7 +3767,8 @@ void menu_switchPage(uint8_t pageNr)
 
 	case FX_MODE_PAGE:
 
-		menu_switchSubPage(fxBus.fxType, 1 );
+		//the kit's FX type, as shown on the page (the running one differs while morph is up)
+		menu_switchSubPage(activeParameters[PAR_FX_TYPE], 1 );
 		editModeActive = 0;
 		menu_activePage=FX_MODE_PAGE;
 		break;

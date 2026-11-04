@@ -1526,10 +1526,11 @@ void midiParser_ccHandler(MidiMsg msg, uint8_t updateOriginalValue, uint8_t isFl
 				fxBus.fxType = value.itg;
 				FxBus_updateParameter();
 				//change visible parameters to selected FX type
+				//the kit's FX type, not the running one: with morph up they differ, and the page must match the "FX type" shown
 				if(menu_activePage == FX_MODE_PAGE)
 				{
-					if(menu_getSubPage() != fxBus.fxType)
-						menu_switchSubPage(fxBus.fxType, 1 );
+					if(menu_getSubPage() != activeParameters[PAR_FX_TYPE])
+						menu_switchSubPage(activeParameters[PAR_FX_TYPE], 1 );
 				}
 #endif
 				break;

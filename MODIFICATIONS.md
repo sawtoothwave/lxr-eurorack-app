@@ -20,7 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
-| 1.51-c4 | Load one drum from another kit, LFO retrigger fix. Not yet tested on the module. |
+| 1.51-c4 | Load one drum from another kit, LFO retrigger fix, FX page matches its FX type. Not yet tested on the module. |
 | 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
@@ -216,3 +216,9 @@ kit, without loading the whole kit.
   switched an LFO whose retrigger was "off" to "v1", so the LFO restarted each time drum 1 played. Kits
   saved after a load kept the "v1". LFOs that were set to "off" before that save now need setting
   back to "off" by hand.
+- **The FX page always shows the parameters of the FX type it names.** In the official firmware, with
+  morph above 0, the page could say "del" but show another effect's parameters. Morph blends the FX type
+  between the two kits, so the effect you hear can switch, and the page followed that effect while the
+  "FX type" value showed the kit's own. The page now follows the kit's FX type. Morph sounds the same as
+  before, including the switching effects. As on every other page, the values shown are the kit's, not the
+  blended ones.
