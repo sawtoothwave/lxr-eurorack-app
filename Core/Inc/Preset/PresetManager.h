@@ -60,6 +60,8 @@ extern char currentFolder[13];
 
 void preset_init(uint8_t presetNr);
 
+/** 1 when morph is in use: the morph knob above 0, or the mod matrix modulating morph*/
+uint8_t preset_isMorphActive();
 /** 1 when kit slot kitNr holds a kit from the SD card (0 = empty slot, init kit)*/
 uint8_t preset_kitExists(uint8_t kitNr);
 /** load drum srcDrum (0-6) of stored kit kitNr into drum dstDrum (0-6) of the active kit*/

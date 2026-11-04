@@ -15,6 +15,9 @@
 
 #include "IO/DIO.h"
 #include "buttonHandler.h"
+#include "Preset/PresetManager.h"
+
+#define MORPH_BLINK_MS 1000		/**< EDIT light: this long changed, this long normal, while morph is in use*/
 //SPI_HandleTypeDef *spi1;
 //SPI_HandleTypeDef hspi1;
 
@@ -179,7 +182,16 @@ void dio_process()
 
 	//process dout LED data
 	//	HAL_SPI_Transmit(spi1, dout_outputData, NUM_OUTS/8, 100);
-	if(dout_outputData[0] & 0x01)	LED_1_GPIO_Port->BSRR = LED_1_Pin;
+
+	//EDIT light (LED_1 pin) blinks slowly while morph is in use. Flipped only here, so nothing that sets
+	//or clears the lights can stop it, and it shows its normal state again as soon as morph is off
+	uint8_t editLed = dout_outputData[0] & 0x01;
+	if(preset_isMorphActive() && ((HAL_GetTick() / MORPH_BLINK_MS) & 1))
+	{
+		editLed ^= 0x01;
+	}
+
+	if(editLed)						LED_1_GPIO_Port->BSRR = LED_1_Pin;
 	else							LED_1_GPIO_Port->BSRR = LED_1_Pin << 16;
 
 	if(dout_outputData[0] & 0x02)	LED_2_GPIO_Port->BSRR = LED_2_Pin;

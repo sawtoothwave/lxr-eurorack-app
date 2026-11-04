@@ -2277,6 +2277,20 @@ uint8_t preset_getMorphValue(uint16_t index, uint8_t morph)
 	return interpolate(activeParameters[index],mainParameters[activeParameters[PAR_MORPH_TARGET]][index],morph);
 };
 //----------------------------------------------------
+/** 1 when the morph knob is above 0, or a mod matrix slot (LFO, CV jack or accent) modulates morph.
+ * A CV jack routed to morph counts even with no cable in: the module can't tell if one is plugged in.*/
+uint8_t preset_isMorphActive()
+{
+	if(activeParameters[PAR_MORPH] != 0) return 1;
+
+	for(uint8_t i=0;i<NUM_MOD_SLOTS;i++)
+	{
+		//depth from the kit: CV_process skips depth-0 slots before updating cvModulators[i].amount, so that keeps the old depth
+		if(cvModulators[i].destination == PAR_MORPH && activeParameters[PAR_CV_MOD_AMT_1+i] != 0) return 1;
+	}
+	return 0;
+}
+//----------------------------------------------------
 #if !EURORACK_MODULE
 FRESULT preset_createProject(uint8_t presetNr)
 {

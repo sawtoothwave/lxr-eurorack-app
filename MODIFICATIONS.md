@@ -20,6 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
+| 1.51-c5 | EDIT light blinks while morph is in use. Not yet tested on the module. |
 | 1.51-c4 | Load one drum from another kit, LFO retrigger fix, FX page matches its FX type. |
 | 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
@@ -175,6 +176,17 @@ kit, without loading the whole kit.
 - **Tapping a select button works as before** and switches sub page. When you turn the encoder while holding
   it, the sub page goes back to the one you were on.
 - The kit on the SD card only changes when you save the kit.
+
+## Morph reminder
+
+The **EDIT** light blinks slowly (1 second changed, 1 second normal) while morph is in use, so you can't
+forget it's on. Morph counts as in use when:
+- the morph knob on the perform page is above 0, or
+- a mod matrix slot modulates morph with a depth above 0, whatever its source (LFO, CV jack or accent).
+
+A CV jack routed to morph counts even with no cable plugged in, because the module can't tell whether a
+cable is there. In EDIT mode the lit EDIT light blinks off; in other modes the dark EDIT light blinks on.
+When morph stops being in use, the EDIT light goes straight back to normal.
 
 ## Fixes
 
