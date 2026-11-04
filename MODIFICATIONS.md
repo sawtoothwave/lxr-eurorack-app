@@ -20,6 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
+| 1.51-c4 | Load one drum from another kit, LFO retrigger fix. Not yet tested on the module. |
 | 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
 | 1.51-c2 | FX routing shortcut, stereo delay echoes, restart shortcut, delay fix. |
 | 1.51-c1 | Start-up screen, LFO shortcuts, muting in perform mode, fixes. This version still showed "1.51" on the start-up screen. |
@@ -186,3 +187,7 @@ card at start-up, so saving to the new card before a restart could damage the fi
   until it's switched off, so you can try saving again. The same applies to saving the morph kit.
 - **A damaged "last used kit" file on the SD card no longer breaks start-up.** The module starts with
   kit 1 instead of reading past the end of the kit list.
+- **Loading a kit keeps each LFO's retrigger setting.** In the official firmware, every kit load
+  switched an LFO whose retrigger was "off" to "v1", so the LFO restarted each time drum 1 played. Kits
+  saved after a load kept the "v1". LFOs that were set to "off" before that save now need setting
+  back to "off" by hand.

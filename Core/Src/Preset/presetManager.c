@@ -1105,11 +1105,15 @@ IN_ITCM_RAM void preset_sendDrumsetParametersImmediate()
 		//special case mod targets
 		for(i=0;i<NUM_MOD_SLOTS;i++)
 		{
+			uint16_t value;
+			uint8_t upper,lower;
+			//only 6 velocity/LFO slots: past them the voice check below overwrote the LFO retrigger settings
+			if(i < 6)
+			{
 			//**VELO load drumkit. translate to param value before sending
 			// parameter_values[PAR_VEL_DEST_1+i] is an index into modTargets, we need to send
 			// a parameter number
-			uint16_t value = pgm_read_word(&modTargets[activeParameters[PAR_VEL_DEST_1+i]].param);
-			uint8_t upper,lower;
+			value = pgm_read_word(&modTargets[activeParameters[PAR_VEL_DEST_1+i]].param);
 			upper = (uint8_t)(((value&0x80)>>7) | (((i)&0x3f)<<1));
 			lower = value&0x7f;
 			frontPanel_sendData(CC_VELO_TARGET,upper,lower);
@@ -1124,6 +1128,7 @@ IN_ITCM_RAM void preset_sendDrumsetParametersImmediate()
 			upper = (uint8_t)(((value&0x80)>>7) | (((i)&0x3f)<<1));
 			lower = value&0x7f;
 			frontPanel_sendData(CC_LFO_TARGET,upper,lower);
+			}
 
 			//CV
 			value = pgm_read_word(&modTargets[activeParameters[PAR_CV_DEST_1+i]].param);
@@ -1201,11 +1206,15 @@ void preset_sendDrumsetParameters()
 	//special case mod targets
 	for(i=0;i<NUM_MOD_SLOTS;i++)
 	{
+		uint16_t value;
+		uint8_t upper,lower;
+		//only 6 velocity/LFO slots: past them the voice check below overwrote the LFO retrigger settings
+		if(i < 6)
+		{
 		//**VELO load drumkit. translate to param value before sending
 		// parameter_values[PAR_VEL_DEST_1+i] is an index into modTargets, we need to send
 		// a parameter number
-		uint16_t value = pgm_read_word(&modTargets[activeParameters[PAR_VEL_DEST_1+i]].param);
-		uint8_t upper,lower;
+		value = pgm_read_word(&modTargets[activeParameters[PAR_VEL_DEST_1+i]].param);
 		upper = (uint8_t)(((value&0x80)>>7) | (((i)&0x3f)<<1));
 		lower = value&0x7f;
 		frontPanel_sendData(CC_VELO_TARGET,upper,lower);
@@ -1220,7 +1229,7 @@ void preset_sendDrumsetParameters()
 		upper = (uint8_t)(((value&0x80)>>7) | (((i)&0x3f)<<1));
 		lower = value&0x7f;
 		frontPanel_sendData(CC_LFO_TARGET,upper,lower);
-
+		}
 
 		//CV
 		value = pgm_read_word(&modTargets[activeParameters[PAR_CV_DEST_1+i]].param);

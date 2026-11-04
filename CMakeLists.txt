@@ -27,7 +27,7 @@ project(LXR_V2_STM32F765_Eurorack
 
 # Custom firmware release number, on top of the official version above. Raise it by 1 for each
 # release. The full version (e.g. 1.51-c2) is shown on the start-up screen and names the update file.
-set(LXR_CUSTOM_VERSION 3)
+set(LXR_CUSTOM_VERSION 4)
 set(LXR_FIRMWARE_VERSION "${PROJECT_VERSION}-c${LXR_CUSTOM_VERSION}")
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
