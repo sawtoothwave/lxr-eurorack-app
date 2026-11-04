@@ -60,6 +60,11 @@ extern char currentFolder[13];
 
 void preset_init(uint8_t presetNr);
 
+/** 1 when kit slot kitNr holds a kit from the SD card (0 = empty slot, init kit)*/
+uint8_t preset_kitExists(uint8_t kitNr);
+/** load drum srcDrum (0-6) of stored kit kitNr into drum dstDrum (0-6) of the active kit*/
+void preset_loadDrumFromKit(uint8_t kitNr, uint8_t srcDrum, uint8_t dstDrum);
+
 #define SKIP_NEXT_KIT_AUTOLOAD 2
 
 

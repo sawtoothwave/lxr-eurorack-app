@@ -46,6 +46,10 @@ extern uint8_t menu_activePage;
 extern uint8_t menu_activeVoice;
 extern uint8_t menu_lfoSelectActive;
 extern uint8_t menu_restartArmed;
+/** select button for drum 0-6 pressed on a drum page: turning the encoder while it's held loads drums from other kits*/
+void menu_drumLoadArm(uint8_t drum);
+/** that select button released: a drum that wasn't locked in with the encoder click is taken back*/
+void menu_drumLoadRelease(uint8_t drum);
 extern uint8_t menu_playedPattern;
 extern uint8_t menu_activePatternBank;
 extern uint8_t menu_shownPattern;

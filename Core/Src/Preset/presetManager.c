@@ -484,8 +484,11 @@ uint8_t preset_isNameEmpty(char* name)
 }
 //----------------------------------------------------
 //load init kit
+static uint8_t preset_kitHasFile[NUM_KIT_SLOTS];	/**< 1 when the kit slot was loaded from or saved to a file, so browsing can skip empty slots*/
+
 void preset_init(uint8_t presetNr)
 {
+	preset_kitHasFile[presetNr] = 0;
 
 	//const uint8_t presetNr = menu_selectedPresetNr[SAVE_TYPE_KIT];
 
@@ -702,6 +705,154 @@ void preset_saveDrumsetRam(uint8_t presetNr, uint8_t isMorph)
 	}
 }
 //----------------------------------------------------
+// Loading one drum from another kit (hold a select button on a drum page, turn the encoder)
+
+uint8_t preset_kitExists(uint8_t kitNr)
+{
+	return preset_kitHasFile[kitNr];
+}
+
+/** Each drum's own settings. Row = drum 1-6 (both hi-hats share row 6), column = the same setting in
+ * every row, so drums 1-3 (same engine) can take each other's settings. PAR_NONE = the drum hasn't got it.
+ * Left out on purpose: audio out (the slot keeps its own), LFO retrigger and the mod matrix (links to other
+ * drums, handled in preset_loadDrumFromKit), velocity and LFO targets (not used by the module).*/
+#define DRUM_PARAMS 43
+static const uint16_t preset_drumParams[6][DRUM_PARAMS] =
+{
+	{	PAR_COARSE1, PAR_FINE1, PAR_OSC_WAVE_DRUM1, PAR_PWM_1, PAR_CV_1VOCT_1,
+		PAR_VELOA1, PAR_VELOD1, PAR_NONE, PAR_VOL_SLOPE1, PAR_NONE,
+		PAR_MOD_EG1, PAR_PITCH_SLOPE1, PAR_MODAMNT1, PAR_VOLUME_MOD_ON_OFF1,
+		PAR_FMAMNT1, PAR_FM_FREQ1, PAR_MOD_WAVE_DRUM1, PAR_MIX_MOD_1,
+		PAR_NONE, PAR_NONE,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_TRANS1_WAVE, PAR_TRANS1_VOL, PAR_TRANS1_FREQ,
+		PAR_FILTER_FREQ_1, PAR_RESO_1, PAR_FILTER_TYPE_1, PAR_FILTER_DRIVE_1,
+		PAR_VOL1, PAR_PAN1, PAR_VOICE_DECIMATION1, PAR_DRIVE1,
+		PAR_FREQ_LFO1, PAR_AMOUNT_LFO1, PAR_WAVE_LFO1, PAR_SYNC_LFO1, PAR_OFFSET_LFO1,
+		PAR_VELO_MOD_AMT_1 },
+	{	PAR_COARSE2, PAR_FINE2, PAR_OSC_WAVE_DRUM2, PAR_PWM_2, PAR_CV_1VOCT_2,
+		PAR_VELOA2, PAR_VELOD2, PAR_NONE, PAR_VOL_SLOPE2, PAR_NONE,
+		PAR_MOD_EG2, PAR_PITCH_SLOPE2, PAR_MODAMNT2, PAR_VOLUME_MOD_ON_OFF2,
+		PAR_FMAMNT2, PAR_FM_FREQ2, PAR_MOD_WAVE_DRUM2, PAR_MIX_MOD_2,
+		PAR_NONE, PAR_NONE,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_TRANS2_WAVE, PAR_TRANS2_VOL, PAR_TRANS2_FREQ,
+		PAR_FILTER_FREQ_2, PAR_RESO_2, PAR_FILTER_TYPE_2, PAR_FILTER_DRIVE_2,
+		PAR_VOL2, PAR_PAN2, PAR_VOICE_DECIMATION2, PAR_DRIVE2,
+		PAR_FREQ_LFO2, PAR_AMOUNT_LFO2, PAR_WAVE_LFO2, PAR_SYNC_LFO2, PAR_OFFSET_LFO2,
+		PAR_VELO_MOD_AMT_2 },
+	{	PAR_COARSE3, PAR_FINE3, PAR_OSC_WAVE_DRUM3, PAR_PWM_3, PAR_CV_1VOCT_3,
+		PAR_VELOA3, PAR_VELOD3, PAR_NONE, PAR_VOL_SLOPE3, PAR_NONE,
+		PAR_MOD_EG3, PAR_PITCH_SLOPE3, PAR_MODAMNT3, PAR_VOLUME_MOD_ON_OFF3,
+		PAR_FMAMNT3, PAR_FM_FREQ3, PAR_MOD_WAVE_DRUM3, PAR_MIX_MOD_3,
+		PAR_NONE, PAR_NONE,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_TRANS3_WAVE, PAR_TRANS3_VOL, PAR_TRANS3_FREQ,
+		PAR_FILTER_FREQ_3, PAR_RESO_3, PAR_FILTER_TYPE_3, PAR_FILTER_DRIVE_3,
+		PAR_VOL3, PAR_PAN3, PAR_VOICE_DECIMATION3, PAR_DRIVE3,
+		PAR_FREQ_LFO3, PAR_AMOUNT_LFO3, PAR_WAVE_LFO3, PAR_SYNC_LFO3, PAR_OFFSET_LFO3,
+		PAR_VELO_MOD_AMT_3 },
+	//snare/clap
+	{	PAR_COARSE4, PAR_FINE4, PAR_OSC_WAVE_SNARE, PAR_PWM_4, PAR_CV_1VOCT_4,
+		PAR_VELOA4, PAR_VELOD4, PAR_NONE, PAR_VOL_SLOPE4, PAR_REPEAT4,
+		PAR_MOD_EG4, PAR_PITCH_SLOPE4, PAR_MODAMNT4, PAR_VOLUME_MOD_ON_OFF4,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_NOISE_FREQ1, PAR_MIX1,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_TRANS4_WAVE, PAR_TRANS4_VOL, PAR_TRANS4_FREQ,
+		PAR_FILTER_FREQ_4, PAR_RESO_4, PAR_FILTER_TYPE_4, PAR_FILTER_DRIVE_4,
+		PAR_VOL4, PAR_PAN4, PAR_VOICE_DECIMATION4, PAR_SNARE_DISTORTION,
+		PAR_FREQ_LFO4, PAR_AMOUNT_LFO4, PAR_WAVE_LFO4, PAR_SYNC_LFO4, PAR_OFFSET_LFO4,
+		PAR_VELO_MOD_AMT_4 },
+	//cymbal
+	{	PAR_COARSE5, PAR_FINE5, PAR_WAVE1_CYM, PAR_PWM_5, PAR_CV_1VOCT_5,
+		PAR_VELOA5, PAR_VELOD5, PAR_NONE, PAR_VOL_SLOPE5, PAR_REPEAT5,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_VOLUME_MOD_ON_OFF5,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_NONE, PAR_NONE,
+		PAR_MOD_OSC_F1_CYM, PAR_MOD_OSC_F2_CYM, PAR_MOD_OSC_GAIN1_CYM, PAR_MOD_OSC_GAIN2_CYM, PAR_WAVE2_CYM, PAR_WAVE3_CYM,
+		PAR_TRANS5_WAVE, PAR_TRANS5_VOL, PAR_TRANS5_FREQ,
+		PAR_FILTER_FREQ_5, PAR_RESO_5, PAR_FILTER_TYPE_5, PAR_FILTER_DRIVE_5,
+		PAR_VOL5, PAR_PAN5, PAR_VOICE_DECIMATION5, PAR_CYMBAL_DISTORTION,
+		PAR_FREQ_LFO5, PAR_AMOUNT_LFO5, PAR_WAVE_LFO5, PAR_SYNC_LFO5, PAR_OFFSET_LFO5,
+		PAR_VELO_MOD_AMT_5 },
+	//hi-hats (closed and open)
+	{	PAR_COARSE6, PAR_FINE6, PAR_WAVE1_HH, PAR_PWM_6, PAR_CV_1VOCT_6,
+		PAR_VELOA6, PAR_VELOD6_CLOSED, PAR_VELOD6_OPEN, PAR_VOL_SLOPE6, PAR_NONE,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_VOLUME_MOD_ON_OFF6,
+		PAR_NONE, PAR_NONE, PAR_NONE, PAR_NONE,
+		PAR_NONE, PAR_NONE,
+		PAR_MOD_OSC_F1, PAR_MOD_OSC_F2, PAR_MOD_OSC_GAIN1, PAR_MOD_OSC_GAIN2, PAR_WAVE2_HH, PAR_WAVE3_HH,
+		PAR_TRANS6_WAVE, PAR_TRANS6_VOL, PAR_TRANS6_FREQ,
+		PAR_FILTER_FREQ_6, PAR_RESO_6, PAR_FILTER_TYPE_6, PAR_FILTER_DRIVE_6,
+		PAR_VOL6, PAR_PAN6, PAR_VOICE_DECIMATION6, PAR_HAT_DISTORTION,
+		PAR_FREQ_LFO6, PAR_AMOUNT_LFO6, PAR_WAVE_LFO6, PAR_SYNC_LFO6, PAR_OFFSET_LFO6,
+		PAR_VELO_MOD_AMT_6 },
+};
+
+/** copy drum srcDrum (0-6) of stored kit kitNr into drum dstDrum (0-6) of the active kit and send the kit
+ * to the sound engine. Links to other drums (LFO retrigger, mod matrix sources and destinations) are
+ * cleared, the drum's links to itself move with it. Drums 6 and 7 always come together.*/
+void preset_loadDrumFromKit(uint8_t kitNr, uint8_t srcDrum, uint8_t dstDrum)
+{
+	const uint8_t *src = mainParameters[kitNr];
+	const uint8_t s = srcDrum > 5 ? 5 : srcDrum;
+	const uint8_t d = dstDrum > 5 ? 5 : dstDrum;
+
+	for(uint8_t i=0;i<DRUM_PARAMS;i++)
+	{
+		const uint16_t from = preset_drumParams[s][i];
+		const uint16_t to = preset_drumParams[d][i];
+		if(from != PAR_NONE && to != PAR_NONE)
+		{
+			activeParameters[to] = src[from];
+		}
+	}
+
+	//retrigger: 0 = off, 1-6 = the drum that restarts the LFO
+	activeParameters[PAR_RETRIGGER_LFO1+d] = (src[PAR_RETRIGGER_LFO1+s] == s+1) ? (uint8_t)(d+1) : 0;
+
+	//the 3 mod matrix slots of the drum, only when they're saved with the kit (see preset_loadDrumsetRam)
+	if(activeParameters[PAR_CV_SAVE] == 0)
+	{
+		for(uint8_t k=0;k<3;k++)
+		{
+			const uint8_t from = (uint8_t)(s*3+k);
+			const uint8_t to = (uint8_t)(d*3+k);
+			uint8_t cvSrc = src[PAR_CV_SRC_1+from];
+			uint8_t dest = src[PAR_CV_DEST_1+from];
+			uint8_t otherDrum = 0;
+
+			//sources 0-4 are the CV jacks, 5-10 drum 1-6's LFO, 11-16 drum 1-6's accent
+			if(cvSrc >= 5 && cvSrc <= 16)
+			{
+				const uint8_t first = cvSrc >= 11 ? 11 : 5;
+				if(cvSrc - first == s)	cvSrc = (uint8_t)(first + d);
+				else					otherDrum = 1;
+			}
+
+			//destination: index into modTargets, in a block per drum (voiceFromModTargValue: 1-6, 0 = not a drum)
+			const uint8_t destDrum = voiceFromModTargValue(dest);
+			if(destDrum == s+1)
+			{
+				//drums 1-3 have the same targets in the same order
+				dest = (uint8_t)(dest - pgm_read_byte(&modTargetVoiceOffsets[s].start) + pgm_read_byte(&modTargetVoiceOffsets[d].start));
+			}
+			else if(destDrum != 0)
+			{
+				otherDrum = 1;
+			}
+
+			activeParameters[PAR_CV_SRC_1+to] = cvSrc;
+			activeParameters[PAR_CV_MOD_AMT_1+to] = src[PAR_CV_MOD_AMT_1+from];
+			activeParameters[PAR_CV_DEST_1+to] = otherDrum ? 0 : dest;
+		}
+	}
+
+	preset_sendDrumsetParameters();
+}
+
+//----------------------------------------------------
 FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 {
 #if !CALC_SAMPLES_IN_INTERRUPT
@@ -748,6 +899,7 @@ FRESULT preset_saveDrumsetSD(uint8_t presetNr, uint8_t isMorph)
 
 	//close the file, also after an error so it isn't left open. Closing writes the last data to the card
 	const FRESULT closeRes = f_close((FIL*)&SDFile);
+	if(res == FR_OK && closeRes == FR_OK) preset_kitHasFile[presetNr] = 1;
 
 	return res != FR_OK ? res : closeRes;
 #else
@@ -1078,6 +1230,7 @@ closeFile:
 
 	// update the soundengine with the new parameters
 	if(res==FR_OK) {
+		preset_kitHasFile[presetNr] = 1;
 		//preset_sendDrumsetParameters();
 		return FR_OK;
 	}

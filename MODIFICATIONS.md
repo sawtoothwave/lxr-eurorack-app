@@ -151,6 +151,31 @@ the card out, because kit edits are saved to the card 2 seconds after the last c
 the new card in, restart straight away, without editing anything first. The module only opens the
 card at start-up, so saving to the new card before a restart could damage the files on it.
 
+## Loading one drum from another kit
+
+On a drum page in EDIT mode, you can browse the drums of your saved kits and load one into the current
+kit, without loading the whole kit.
+
+| Shortcut | What it does |
+|---|---|
+| Hold select button 2–8 and turn the encoder | Loads drum 1–7 from the next or previous saved kit. You hear it straight away, and the screen shows where it's from, e.g. "Load drum 2 from" / "  5 TECHNO   d3?". |
+| Click the encoder, still holding the select button | Keeps the drum. Keep turning to carry on browsing from the drum you kept. |
+| Let go of the select button without clicking | Puts back the drum you had before. |
+
+- **Drums 1–3** pick from drums 1–3 of every kit, since they're the same kind of drum. The select button
+  you hold decides where it goes; "d3" on the screen is where it comes from.
+- **Drums 4–7** pick from the same drum in every kit. **Hi-hats** (drums 6 and 7) always come together, and
+  the screen shows "Load hats from".
+- **Empty kit slots** are skipped.
+- **The drum sounds as it will in this kit**, not as it did in the kit it came from: it plays through this
+  kit's FX, and the drum keeps this kit's audio out and FX routing.
+- **Links to other drums are cleared:** an LFO retrigger set to another drum, and mod matrix slots that use
+  another drum's LFO or accent or modulate another drum. The drum's links to itself come with it. When CV
+  routing is saved globally (settings page), the mod matrix isn't touched.
+- **Tapping a select button works as before** and switches sub page. When you turn the encoder while holding
+  it, the sub page goes back to the one you were on.
+- The kit on the SD card only changes when you save the kit.
+
 ## Fixes
 
 - **MOD updates the screen when pressed.** In the official firmware, pressing MOD switches the mod

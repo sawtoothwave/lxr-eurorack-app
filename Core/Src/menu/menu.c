@@ -768,6 +768,98 @@ static uint8_t lastEncoderButton = 0;		/**< stores the state of the encoder butt
 uint8_t mainParameters[NUM_KIT_SLOTS][END_OF_SOUND_PARAMETERS];
 //uint8_t abs_pot_Parameter_position[NUM_PARAMS];
 uint8_t activeParameters[NUM_PARAMS];
+
+//-----------------------------------------------------------------
+// Loading one drum from another kit: hold a select button on a drum page and turn the encoder.
+// Drums 1-3 run the same engine and pick from drums 1-3 of every kit, the others from their own slot.
+static int8_t drumLoad_drum = -1;		/**< drum 0-6 whose select button is held on a drum page, -1 = none*/
+static uint8_t drumLoad_browsing = 0;	/**< 1 from the first encoder turn until the click (keep) or the release (take back)*/
+static uint16_t drumLoad_pos;			/**< position in the list of drums to load, see menu_drumLoadKit()*/
+static uint8_t drumLoad_page;			/**< page, sub page and edit mode before the button press switched sub page*/
+static uint8_t drumLoad_menuIndex;
+static uint8_t drumLoad_editMode;
+static uint8_t drumLoad_kitBefore[END_OF_SOUND_PARAMETERS];	/**< the active kit before browsing*/
+
+static uint16_t menu_drumLoadListLength()
+{
+	return drumLoad_drum < 3 ? NUM_KIT_SLOTS*3 : NUM_KIT_SLOTS;
+}
+static uint8_t menu_drumLoadKit()
+{
+	return (uint8_t)(drumLoad_drum < 3 ? drumLoad_pos/3 : drumLoad_pos);
+}
+static uint8_t menu_drumLoadSrcDrum()
+{
+	return (uint8_t)(drumLoad_drum < 3 ? drumLoad_pos%3 : drumLoad_drum);
+}
+
+void menu_drumLoadArm(uint8_t drum)
+{
+	//a 2nd select button while one is held doesn't take over, the 1st one's release still ends browsing
+	if(drumLoad_drum >= 0) return;
+	drumLoad_drum = (int8_t)drum;
+	drumLoad_browsing = 0;
+	drumLoad_page = menu_activePage;
+	drumLoad_menuIndex = menuIndex;
+	drumLoad_editMode = editModeActive;
+	//start at this drum in the current kit
+	const uint8_t kit = menu_selectedPresetNr[SAVE_TYPE_KIT];
+	drumLoad_pos = drum < 3 ? (uint16_t)(kit*3 + drum) : kit;
+}
+
+void menu_drumLoadRelease(uint8_t drum)
+{
+	if(drumLoad_drum != (int8_t)drum) return;
+	if(drumLoad_browsing)
+	{
+		//not locked in: back to the kit from before
+		memcpy(activeParameters, drumLoad_kitBefore, END_OF_SOUND_PARAMETERS);
+		preset_sendDrumsetParameters();
+		preset_touchTimer(PRESET_KIT_TIMER);
+		menu_repaintAll();
+	}
+	drumLoad_drum = -1;
+	drumLoad_browsing = 0;
+}
+
+static void menu_drumLoadEncoder(int8_t inc, uint8_t clicked)
+{
+	if(clicked)
+	{
+		if(drumLoad_browsing)
+		{
+			//lock in: the kit keeps the drum, like any other edit (it's on the SD card once the kit is saved)
+			drumLoad_browsing = 0;
+			preset_touchTimer(PRESET_KIT_TIMER);
+			menu_repaintAll();
+		}
+		return;
+	}
+
+	if(!drumLoad_browsing)
+	{
+		memcpy(drumLoad_kitBefore, activeParameters, END_OF_SOUND_PARAMETERS);
+		drumLoad_browsing = 1;
+		//the button press switched sub page, go back to the one from before
+		if(menu_activePage != drumLoad_page)
+		{
+			menu_switchPage(drumLoad_page);
+		}
+		menuIndex = drumLoad_menuIndex;
+		editModeActive = drumLoad_editMode;
+		led_setActiveSelectButton((uint8_t)(menu_getSubPage()+1));
+	}
+
+	//next drum, skipping kit slots that have no kit
+	const uint16_t len = menu_drumLoadListLength();
+	for(uint16_t n=0; n<len; n++)
+	{
+		drumLoad_pos = (uint16_t)((drumLoad_pos + len + inc) % len);
+		if(preset_kitExists(menu_drumLoadKit())) break;
+	}
+	preset_loadDrumFromKit(menu_drumLoadKit(), menu_drumLoadSrcDrum(), (uint8_t)drumLoad_drum);
+	menu_repaintAll();
+}
 //uint8_t morphParameters[END_OF_SOUND_PARAMETERS];/**< a second array for sound x-fade to another preset*/
 //uint8_t *morphParameters;
 //-----------------------------------------------------------------
@@ -1989,6 +2081,30 @@ void menu_repaint()
 		strcpy(&editDisplayBuffer[0][0], "Release DRUM to");
 		strcpy(&editDisplayBuffer[1][0], "restart");
 	}
+	else if(drumLoad_browsing)
+	{
+		//"Load drum 2 from" / "  5 TECHNO   d3?" (kit number as on the load page, then the kit name and source drum)
+		if(drumLoad_drum >= 5)	strcpy(&editDisplayBuffer[0][0], "Load hats from");
+		else
+		{
+			strcpy(&editDisplayBuffer[0][0], "Load drum 1 from");
+			editDisplayBuffer[0][10] = (char)('1' + drumLoad_drum);
+		}
+
+		const uint8_t kit = menu_drumLoadKit();
+		numtostrpu(&editDisplayBuffer[1][0], kit, ' ');
+		memcpy(&editDisplayBuffer[1][4], savefileNames[kit][KIT_NAMES], 8);
+		if(drumLoad_drum < 3)
+		{
+			editDisplayBuffer[1][13] = 'd';
+			editDisplayBuffer[1][14] = (char)('1' + menu_drumLoadSrcDrum());
+			editDisplayBuffer[1][15] = '?';
+		}
+		else
+		{
+			editDisplayBuffer[1][12] = '?';
+		}
+	}
 	else if(menu_activePage == LOAD_PAGE || menu_activePage==SAVE_PAGE)
 	{
 		//this is a special case because the load/save page differs from all the other pages
@@ -2993,6 +3109,20 @@ static void getMenuItemNameForValue(const uint8_t menuId, const uint8_t curParmV
 void menu_parseEncoder(int8_t inc, uint8_t button)
 {
 	uint8_t btnClicked=0;
+
+	//while a select button is held on a drum page, the encoder loads drums from other kits
+	if(drumLoad_drum >= 0)
+	{
+		const uint8_t clicked = (button != lastEncoderButton) && button;
+		lastEncoderButton = button;
+		if(clicked || inc != 0)
+		{
+			screensaver_touch();
+			menu_drumLoadEncoder(inc, clicked);
+		}
+		return;
+	}
+
 	// handle the button being clicked or released
 	if(button != lastEncoderButton) { // was the button clicked?
 		btnClicked=button;

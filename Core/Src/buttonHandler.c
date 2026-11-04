@@ -2057,6 +2057,13 @@ void buttonHandler_buttonPressed(uint8_t buttonNr) {
 			buttonHandler_showFxRoutingLEDs();
 			break;
 		}
+		//on a drum page in EDIT mode: hold select button 2-8 and turn the encoder to load drum 1-7 from other kits.
+		//armed before the press switches sub page, so the sub page can be put back once the encoder turns
+		if((menu_activePage <= VOICE7_PAGE) && (buttonHandler_stateMemory.selectButtonMode == SELECT_MODE_VOICE)
+				&& !buttonHandler_getShiftButton() && !buttonHandler_getDrumButton())
+		{
+			menu_drumLoadArm((uint8_t) (buttonNr - BUT_2));
+		}
 		buttonHandler_voiceButtonPressed(buttonNr-BUT_1);
 #else
 	case BUT_VOICE_1:
@@ -2577,6 +2584,7 @@ void buttonHandler_buttonReleased(uint8_t buttonNr)
 	case BUT_6:
 	case BUT_7:
 	case BUT_8:
+		menu_drumLoadRelease((uint8_t) (buttonNr - BUT_2));
 		buttonHandler_voiceButtonReleased(buttonNr-BUT_1);
 
 		break;
