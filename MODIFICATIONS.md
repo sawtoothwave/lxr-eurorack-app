@@ -30,7 +30,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 ## Start-up screen
 
 The first line of the start-up screen reads **"Custom firmware"** instead of "Sonic Potions", as the
-licence requires for modified firmware. The second line reads "LXR2 V" and the version, for example
+license requires for modified firmware. The second line reads "LXR2 V" and the version, for example
 "LXR2 V1.51-c2", instead of "LXR2 Drums V1.51", to make room for the custom version number.
 
 ## LFO shortcuts
@@ -89,11 +89,11 @@ Muting no longer needs a button combination. Select buttons 2–8 control drums 
 ## Delay
 
 In the normal delay mode, each drum's echoes now sit where the drum is panned. A drum panned 30R echoes
-at 30R; a centred drum echoes in the centre. Ping-pong mode works as in the official firmware.
+at 30R; a centered drum echoes in the center. Ping-pong mode works as in the official firmware.
 
-- **In the official firmware, normal-mode echoes were always in the centre.** The delay added left
+- **In the official firmware, normal-mode echoes were always in the center.** The delay added left
   and right together into one mono delay line. It now has a separate left and right line.
-- **Echoes start at the drum's own level, about 6 dB quieter than before for a centred drum.** Adding
+- **Echoes start at the drum's own level, about 6 dB quieter than before for a centered drum.** Adding
   left and right together made the official echoes louder than the dry sound. Turn up wet/dry or
   feedback to make up for it.
 - **The longest delay is still about 742 ms.** The right line uses a second 64 kB buffer in the
@@ -106,12 +106,12 @@ A filter on all four outputs, on the perform page. From OpenElixir-02 (custom LX
 
 | Perform page | What it does |
 |---|---|
-| Knob 4, "dj" | Centre (shown as "Off" while editing): no filter. Turn left for a low-pass that closes down to 40 Hz ("LP"), right for a high-pass that opens up to 8 kHz ("HP"). |
+| Knob 4, "dj" | Center (shown as "Off" while editing): no filter. Turn left for a low-pass that closes down to 40 Hz ("LP"), right for a high-pass that opens up to 8 kHz ("HP"). |
 | Knob 4 on the 2nd screen, "res" | Resonance, 20 at start-up. Turn the encoder right from "dj" to get there. |
 | DRUM button (PERFORM mode) | Snaps the filter back to off and shows "DJ filter reset!" while held (instead of "Selected Drum"). It opens over a few milliseconds instead of cutting, so there's no click. |
 
-- **With the knob in the centre, the sound is exactly as without the filter.** A few steps either side
-  of the centre also count as off, because the knob has no centre click.
+- **With the knob in the center, the sound is exactly as without the filter.** A few steps either side
+  of the center also count as off, because the knob has no center click.
 - **It filters every drum and the FX on all four jacks together,** including drums routed to separate
   jacks.
 - **The limiter comes after the filter,** so a high resonance can't make the outputs clip.
@@ -146,7 +146,7 @@ Restarts the module without switching off the rack, for example to install an up
    - **Encoder already released:** the module restarts normally.
 
 Letting go of either button before the 3 seconds are up does nothing. After the message appears,
-the restart can't be cancelled.
+the restart can't be canceled.
 
 **Swapping the SD card while the module is on:** wait a few seconds after your last edit before taking
 the card out, because kit edits are saved to the card 2 seconds after the last change. After putting

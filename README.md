@@ -15,7 +15,7 @@ It is not made, approved or supported by Erica Synths.
 
 ## Install
 
-1. Copy `LXRE_V2_V1.41-c6.img` to the top folder of your MicroSD card and delete any older `LXRE*.img`
+1. Copy `LXRE_V2_V1.51-c6.img` to the top folder of your MicroSD card and delete any older `LXRE*.img`
    files from it.
 2. With the module powered off, insert the card. Hold down the encoder button when powering the module on. Keep
    holding until "LXR Updater" appears. You'll then see the new firmware loading.
@@ -36,12 +36,12 @@ I'm an [electronic musician](https://www.mute-city.com) who makes glitchy melodi
 
 You can find me on [Bandcamp](https://mute-city.bandcamp.com/), [Subvert](https://subvert.fm/mute-city), [YouTube](https://www.youtube.com/@Mute-City), and [Instagram](https://instagram.com/mute.city).
 
-## Licence
+## License
 
 Copyright (C) 2012-2026 Erica Synths. Licensed under the [GNU GPL version 3](LICENSE) (GPL-3.0-only)
 with the additional permission and terms in [NOTICE.md](NOTICE.md): modified firmware must be marked as
 modified and must not be presented as official Erica Synths firmware. The trademarks and the hardware
-are not licensed. Third-party components (STMicroelectronics, Arm, ChaN FatFs) keep their own licences,
+are not licensed. Third-party components (STMicroelectronics, Arm, ChaN FatFs) keep their own licenses,
 see [NOTICE.md](NOTICE.md#third-party-components). The names **"Erica Synths" and "LXR"** and the **LXR hardware** are the property of Erica Synths and are **not** covered by this license. Building and installing your own firmware is at your own risk: Erica Synths provides no support for self-built or modified firmware. See [NOTICE.md](NOTICE.md).
 
 Some of the features and fixes come from [OpenElixir-02](https://github.com/tunefish777/openelixir-02),

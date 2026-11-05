@@ -1,0 +1,16 @@
+name: README firmware link
+# Checks that README.md's Download link and Install step 1 name the latest release's firmware file.
+on:
+  push:
+    paths: [README.md, .github/scripts/check-readme-firmware.sh, .github/workflows/readme-firmware.yml]
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/scripts/check-readme-firmware.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
