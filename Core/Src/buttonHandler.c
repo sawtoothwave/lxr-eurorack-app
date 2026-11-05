@@ -2848,4 +2848,6 @@ void buttonHandler_init()
 	led_setActiveSelectButton(menu_getSubPage()+1);
 	menu_resetActiveParameter();
 	buttonHandler_buttonPressed(BUT_2);
+	//that press is simulated and never released: don't leave drum loading armed on drum 1
+	menu_drumLoadRelease(0);
 }

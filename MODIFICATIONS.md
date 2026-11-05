@@ -20,6 +20,7 @@ for example **1.51-c2**. The start-up screen and the update file name show the f
 
 | Version | Changes |
 |---|---|
+| 1.51-c6 | Fix: after start-up, loading a drum from another kit always loaded into drum 1. |
 | 1.51-c5 | EDIT light blinks while morph is in use. |
 | 1.51-c4 | Load one drum from another kit, LFO retrigger fix, FX page matches its FX type. |
 | 1.51-c3 | Fixes from OpenElixir-02, output limiter, DJ filter on the perform page. |
@@ -176,6 +177,9 @@ kit, without loading the whole kit.
 - **Tapping a select button works as before** and switches sub page. When you turn the encoder while holding
   it, the sub page goes back to the one you were on.
 - The kit on the SD card only changes when you save the kit.
+- **Fixed in c6:** in c4 and c5, straight after start-up the module acted as if select button 2 was held.
+  Turning the encoder browsed drums for drum 1 whichever select button you held, until select button 2 was
+  pressed and let go once.
 
 ## Morph reminder
 
