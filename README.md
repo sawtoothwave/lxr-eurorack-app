@@ -15,7 +15,7 @@ It is not made, approved or supported by Erica Synths.
 
 ## Install
 
-1. Copy `LXRE_V2_V<version>.img` to the top folder of your MicroSD card and delete any older `LXRE*.img`
+1. Copy `LXRE_V2_V1.41-c6.img` to the top folder of your MicroSD card and delete any older `LXRE*.img`
    files from it.
 2. With the module powered off, insert the card. Hold down the encoder button when powering the module on. Keep
    holding until "LXR Updater" appears. You'll then see the new firmware loading.
