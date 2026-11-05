@@ -8,7 +8,7 @@ Some of the features and fixes come from [OpenElixir-02](https://github.com/tune
 custom firmware for the LXR-02 desktop drum machine.
 
 - **[MODIFICATIONS.md](MODIFICATIONS.md) lists every difference from the official firmware.**
-- **Download:** [LXRE_V2_V1.51-c5.img](https://github.com/sawtoothwave/lxr-eurorack-app/releases/download/v1.51-c5/LXRE_V2_V1.51-c5.img)
+- **Download:** [LXRE_V2_V1.51-c6.img](https://github.com/sawtoothwave/lxr-eurorack-app/releases/download/v1.51-c6/LXRE_V2_V1.51-c6.img)
   (latest version), then follow [Installing the update](#installing-the-update). Older versions are on the
   [releases page](https://github.com/sawtoothwave/lxr-eurorack-app/releases).
 
